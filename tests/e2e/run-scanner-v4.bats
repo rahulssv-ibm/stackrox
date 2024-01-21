@@ -145,7 +145,11 @@ teardown() {
         export MAIN_IMAGE_TAG
         # shellcheck disable=SC2030,SC2031
         export OUTPUT_FORMAT=kubectl
-        deploy_stackrox
+        deploy_central
+        export_central_basic_auth_creds
+        wait_for_api
+        setup_client_TLS_certs ""
+        record_build_info
     )
     verify_scannerV2_deployed "stackrox"
     verify_scannerV4_deployed "stackrox"
@@ -165,7 +169,11 @@ teardown() {
         export OUTPUT_FORMAT=kubectl
         # shellcheck disable=SC2030,SC2031
         export ROX_SCANNER_V4=false
-        deploy_stackrox
+        deploy_central
+        export_central_basic_auth_creds
+        wait_for_api
+        setup_client_TLS_certs ""
+        record_build_info
     )
     verify_scannerV2_deployed "stackrox"
     verify_no_scannerV4_deployed "stackrox"
