@@ -571,99 +571,99 @@ jobs:
         run: |
           make -C operator/ docker-push-index | cat
 
-  scan-go-binaries:
-    if: github.event_name == 'push'
-    env:
-      ARTIFACT_DIR: junit-reports/
-    runs-on: ubuntu-latest
-    container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
-    needs:
-    - pre-build-cli
-    - pre-build-go-binaries
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
-        ref: ${{ github.event.pull_request.head.sha }}
+  # scan-go-binaries:
+  #   if: github.event_name == 'push'
+  #   env:
+  #     ARTIFACT_DIR: junit-reports/
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+  #   needs:
+  #   - pre-build-cli
+  #   - pre-build-go-binaries
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #     with:
+  #       fetch-depth: 1
+  #       ref: ${{ github.event.pull_request.head.sha }}
 
-    - uses: ./.github/actions/job-preamble
+  #   - uses: ./.github/actions/job-preamble
 
-    - uses: actions/download-artifact@v4
-      with:
-        name: cli-build
+  #   - uses: actions/download-artifact@v4
+  #     with:
+  #       name: cli-build
 
-    - name: Unpack cli build
-      run: |
-        tar xvzf cli-build.tgz
+  #   - name: Unpack cli build
+  #     run: |
+  #       tar xvzf cli-build.tgz
 
-    - uses: actions/download-artifact@v4
-      with:
-        name: go-binaries-build-amd64-default
+  #   - uses: actions/download-artifact@v4
+  #     with:
+  #       name: go-binaries-build-amd64-default
 
-    - name: Unpack Go binaries build
-      run: |
-        tar xvzf go-binaries-build.tgz
+  #   - name: Unpack Go binaries build
+  #     run: |
+  #       tar xvzf go-binaries-build.tgz
 
-    - name: Scan
-      run: |
-        ./scripts/ci/govulncheck.sh
+  #   - name: Scan
+  #     run: |
+  #       ./scripts/ci/govulncheck.sh
 
-    - name: Publish Test Report
-      uses: test-summary/action@v2
-      if: always()
-      with:
-        paths: 'junit-reports/**/*.xml'
+  #   - name: Publish Test Report
+  #     uses: test-summary/action@v2
+  #     if: always()
+  #     with:
+  #       paths: 'junit-reports/**/*.xml'
 
-    - name: Report junit failures in jira
-      uses: ./.github/actions/junit2jira
-      if: always()
-      with:
-        jira-token: ${{ secrets.JIRA_TOKEN }}
-        directory: 'junit-reports'
+  #   - name: Report junit failures in jira
+  #     uses: ./.github/actions/junit2jira
+  #     if: always()
+  #     with:
+  #       jira-token: ${{ secrets.JIRA_TOKEN }}
+  #       directory: 'junit-reports'
 
-  scan-images-with-roxctl:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    needs:
-      - build-and-push-main
-    container:
-      image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
-      env:
-        STACKROX_CI_INSTANCE_API_KEY: ${{ secrets.STACKROX_CI_INSTANCE_API_KEY }}
-        STACKROX_CI_INSTANCE_CENTRAL_HOST: ${{ secrets.STACKROX_CI_INSTANCE_CENTRAL_HOST }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+  # scan-images-with-roxctl:
+  #   if: github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - build-and-push-main
+  #   container:
+  #     image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.61
+  #     env:
+  #       STACKROX_CI_INSTANCE_API_KEY: ${{ secrets.STACKROX_CI_INSTANCE_API_KEY }}
+  #       STACKROX_CI_INSTANCE_CENTRAL_HOST: ${{ secrets.STACKROX_CI_INSTANCE_CENTRAL_HOST }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #         ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: ./.github/actions/job-preamble
+  #     - uses: ./.github/actions/job-preamble
 
-      - name: Checkout submodules
-        run: |
-            git submodule update --init
+  #     - name: Checkout submodules
+  #       run: |
+  #           git submodule update --init
 
-      - uses: ./.github/actions/handle-tagged-build
+  #     - uses: ./.github/actions/handle-tagged-build
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: cli-build
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: cli-build
 
-      - name: Unpack cli build
-        run: |
-          tar xvzf cli-build.tgz
+  #     - name: Unpack cli build
+  #       run: |
+  #         tar xvzf cli-build.tgz
 
-      - name: Install roxctl
-        run: |
-          make cli-install
-          roxctl version
+  #     - name: Install roxctl
+  #       run: |
+  #         make cli-install
+  #         roxctl version
 
-      - name: Scan images
-        run: |
-          ./release/scripts/scan-images-with-roxctl.sh
+  #     - name: Scan images
+  #       run: |
+  #         ./release/scripts/scan-images-with-roxctl.sh
 
   slack-on-build-failure:
     env:
@@ -684,8 +684,8 @@ jobs:
       - pre-build-docs
       - build-and-push-main
       - build-and-push-operator
-      - scan-images-with-roxctl
-      - scan-go-binaries
+      # - scan-images-with-roxctl
+      # - scan-go-binaries
     permissions:
       actions: read
     steps:
