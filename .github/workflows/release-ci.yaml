@@ -3,7 +3,7 @@ on:
   push:
     branches:
     - 'release-*'
-    - 'tm/simulate-release-for-mhess'
+    - 'tm-simulate-release-for-mhess'
     tags-ignore:
     - '*-nightly-*'
 
