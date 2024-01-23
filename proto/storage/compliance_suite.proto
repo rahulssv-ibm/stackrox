@@ -6,133 +6,23 @@ option go_package = "storage";
 option java_package = "io.stackrox.proto.storage";
 
 import "gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
-import "storage/schedule.proto";
-import "storage/user.proto";
 
 package storage;
 
+// Next Tag: 4
+// ComplianceOperatorSuite represents a set of scans with the status
 message ComplianceOperatorSuite {
-    string name = 1 [(gogoproto.moretags) = 'sql:"pk,type(uuid)"'];
-    phase = 2
-    Result = 3
+    string name       = 1 [(gogoproto.moretags) = 'search:"Compliance Suite Name,hidden" sql:"pk"'];
+    string cluster_id = 2 [(gogoproto.moretags) = 'sql:"pk,fk(Cluster:id),no-fk-constraint"'];
+    // string namespace = 3 [(gogoproto.moretags) = 'Namespace,store" sql:"pk"'];
 
+    // Next Tag: 4
+    message Status {
+        // Status of the ComplianceOperatorSuite
+        string phase         = 1;
+        string result        = 2;
+        string error_message = 3;
+    }
+
+    Status status = 3;
 }
-
-
-// ComplianceSuite represents a set of scans that will be applied to the cluster.
-message ComplianceSuite {
-    string apiVersion = 1;
-    string kind = 2;
-    Metadata metadata = 3;
-    ComplianceSuiteSpec spec = 4;
-    ComplianceSuiteStatus status = 5;
-}
-
-message Metadata {
-    // Metadata fields
-    string name = 1;
-    // Additional metadata properties can be added here
-}
-
-message ComplianceSuiteSpec {
-    // Specification for ComplianceSuite
-    bool autoApplyRemediations = 1;
-    bool autoUpdateRemediations = 2;
-    repeated ComplianceScanSpec scans = 3;
-    string schedule = 4;
-    bool suspend = 5;
-}
-
-message ComplianceScanSpec {
-    // Specification for each Compliance Scan
-    string content = 1;
-    string contentImage = 2;
-    bool debug = 3;
-    string httpsProxy = 4;
-    int32 maxRetryOnTimeout = 5;
-    string name = 6;
-    bool noExternalResources = 7;
-    NodeSelector nodeSelector = 8;
-    string priorityClass = 9;
-    string profile = 10;
-    RawResultStorage rawResultStorage = 11;
-    string remediationEnforcement = 12;
-    string rule = 13;
-    ScanLimits scanLimits = 14;
-    repeated Toleration scanTolerations = 15;
-    string scanType = 16;
-    bool showNotApplicable = 17;
-    bool strictNodeScan = 18;
-    TailoringConfigMap tailoringConfigMap = 19;
-    string timeout = 20;
-}
-
-message NodeSelector {
-    map<string, string> selector = 1;
-}
-
-message RawResultStorage {
-    NodeSelector nodeSelector = 1;
-    repeated string pvAccessModes = 2;
-    int32 rotation = 3;
-    string size = 4;
-    string storageClassName = 5;
-    repeated Toleration tolerations = 6;
-}
-
-message ScanLimits {
-    map<string, string> limits = 1;
-}
-
-message Toleration {
-    string effect = 1;
-    string key = 2;
-    string operator = 3;
-    int64 tolerationSeconds = 4;
-    string value = 5;
-}
-
-message TailoringConfigMap {
-    string name = 1;
-}
-
-message ComplianceSuiteStatus {
-    // Status of the ComplianceSuite
-    repeated Condition conditions = 1;
-    string errorMessage = 2;
-    string phase = 3;
-    string result = 4;
-    repeated ComplianceScanStatus scanStatuses = 5;
-}
-
-message Condition {
-    string lastTransitionTime = 1;
-    string message = 2;
-    string reason = 3;
-    string status = 4;
-    string type = 5;
-}
-
-message ComplianceScanStatus {
-    // Status of each Compliance Scan
-    repeated Condition conditions = 1;
-    int64 currentIndex = 2;
-    string endTimestamp = 3;
-    string errorMessage = 4;
-    string name = 5;
-    string phase = 6;
-    int32 remainingRetries = 7;
-    string result = 8;
-    ResultsStorage resultsStorage = 9;
-    string startTimestamp = 10;
-    string warnings = 11;
-}
-
-message ResultsStorage {
-    string apiVersion = 1;
-    string kind = 2;
-    string name = 3;
-    string namespace = 4;
-}
-

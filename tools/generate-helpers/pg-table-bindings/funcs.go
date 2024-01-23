@@ -38,6 +38,7 @@ func parseReferencesAndInjectPeerSchemas(schema *walker.Schema, refs []string) (
 		})
 	}
 	schema.ResolveReferences(func(messageTypeName string) *walker.Schema {
+		log.Printf("funcs: messageTypeName %s", messageTypeName)
 		return schemasByObjType[fmt.Sprintf("storage.%s", messageTypeName)]
 	})
 	return parsedRefs

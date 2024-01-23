@@ -357,6 +357,7 @@ func (s *Schema) ResolveReferences(schemaProvider func(messageTypeName string) *
 		if fieldRef.OtherSchema != nil && fieldRef.ColumnName != "" {
 			continue
 		}
+		log.Infof("fieldRef.TypeName %s", fieldRef.TypeName)
 		referencedSchema := schemaProvider(fieldRef.TypeName)
 		if referencedSchema == nil {
 			log.Panicf("Couldn't resolve reference in field %+v (ref: %v): type not provided", f, *fieldRef)
