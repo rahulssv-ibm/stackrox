@@ -43,8 +43,9 @@ func (s *pipelineImpl) Capabilities() []centralsensor.CentralCapability {
 }
 
 func (s *pipelineImpl) Reconcile(ctx context.Context, clusterID string, storeMap *reconciliation.StoreMap) error {
+	// Nothing to do in this case
 	if !features.ComplianceEnhancements.Enabled() {
-		return errors.New("Next gen compliance is disabled.  Message unexpected.")
+		return nil
 	}
 
 	existingIDs := set.NewStringSet()
@@ -70,7 +71,7 @@ func (s *pipelineImpl) Match(msg *central.MsgFromSensor) bool {
 
 // Run runs the pipeline template on the input and returns the output.
 func (s *pipelineImpl) Run(ctx context.Context, clusterID string, msg *central.MsgFromSensor, _ common.MessageInjector) error {
-	defer countMetrics.IncrementResourceProcessedCounter(pipeline.ActionToOperation(msg.GetEvent().GetAction()), metrics.ComplianceOperatorRule)
+	defer countMetrics.IncrementResourceProcessedCounter(pipeline.ActionToOperation(msg.GetEvent().GetAction()), metrics.ComplianceOperatorRuleV2)
 
 	if !features.ComplianceEnhancements.Enabled() {
 		return errors.New("Next gen compliance is disabled.  Message unexpected.")

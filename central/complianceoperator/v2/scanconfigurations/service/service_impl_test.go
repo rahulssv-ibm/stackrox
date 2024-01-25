@@ -105,6 +105,7 @@ func (s *ComplianceScanConfigServiceTestSuite) TestCreateComplianceScanConfigura
 	allAccessContext := sac.WithAllAccess(context.Background())
 
 	request := getTestAPIRec()
+	request.Id = uuid.NewDummy().String()
 	storageRequest := convertV2ScanConfigToStorage(allAccessContext, request)
 	processResponse := convertV2ScanConfigToStorage(allAccessContext, request)
 	processResponse.Id = uuid.NewDummy().String()
@@ -207,9 +208,9 @@ func (s *ComplianceScanConfigServiceTestSuite) TestListComplianceScanConfigurati
 						AutoApplyRemediations:  false,
 						AutoUpdateRemediations: false,
 						OneTimeScan:            false,
-						Profiles: []*storage.ProfileShim{
+						Profiles: []*storage.ComplianceOperatorScanConfigurationV2_ProfileName{
 							{
-								ProfileId: "ocp4-cis",
+								ProfileName: "ocp4-cis",
 							},
 						},
 						StrictNodeScan:  false,
@@ -309,9 +310,9 @@ func (s *ComplianceScanConfigServiceTestSuite) TestGetComplianceScanConfiguratio
 						AutoApplyRemediations:  false,
 						AutoUpdateRemediations: false,
 						OneTimeScan:            false,
-						Profiles: []*storage.ProfileShim{
+						Profiles: []*storage.ComplianceOperatorScanConfigurationV2_ProfileName{
 							{
-								ProfileId: "ocp4-cis",
+								ProfileName: "ocp4-cis",
 							},
 						},
 						StrictNodeScan:  false,
@@ -344,6 +345,24 @@ func (s *ComplianceScanConfigServiceTestSuite) TestGetComplianceScanConfiguratio
 			s.Require().Equal(tc.expectedResp, config)
 		})
 	}
+}
+
+func (s *ComplianceScanConfigServiceTestSuite) TestRunComplianceScanConfigurationWithValidScanConfigIdSucceeds() {
+	allAccessContext := sac.WithAllAccess(context.Background())
+
+	validID := "validScanConfigID"
+	s.manager.EXPECT().ProcessRescanRequest(gomock.Any(), validID).Return(nil).Times(1)
+
+	_, err := s.service.RunComplianceScanConfiguration(allAccessContext, &v2.ResourceByID{Id: validID})
+	s.Require().NoError(err)
+}
+
+func (s *ComplianceScanConfigServiceTestSuite) TestRunComplianceScanConfigurationWithInvalidScanConfigIdFails() {
+	allAccessContext := sac.WithAllAccess(context.Background())
+
+	invalidID := ""
+	_, err := s.service.RunComplianceScanConfiguration(allAccessContext, &v2.ResourceByID{Id: invalidID})
+	s.Require().Error(err)
 }
 
 func getTestAPIStatusRec(createdTime, lastUpdatedTime *types.Timestamp) *apiV2.ComplianceScanConfigurationStatus {
