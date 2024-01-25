@@ -6,23 +6,97 @@ option go_package = "storage";
 option java_package = "io.stackrox.proto.storage";
 
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+// import "storage/compliance_operator_v2.proto";
 
 package storage;
 
-// Next Tag: 4
+enum ComplianceOperatorScanStatusPhase {
+    PHASE_PENDING = 0;
+    PHASE_LAUNCHING = 1;
+    PHASE_RUNNING = 2;
+    PHASE_AGGREGATING = 3;
+    PHASE_DONE = 4;
+}
+
+// Next Tag: 5
 // ComplianceOperatorSuite represents a set of scans with the status
 message ComplianceOperatorSuite {
     string name       = 1 [(gogoproto.moretags) = 'search:"Compliance Suite Name,hidden" sql:"pk"'];
     string cluster_id = 2 [(gogoproto.moretags) = 'sql:"pk,fk(Cluster:id),no-fk-constraint"'];
     // string namespace = 3 [(gogoproto.moretags) = 'Namespace,store" sql:"pk"'];
 
-    // Next Tag: 4
     message Status {
-        // Status of the ComplianceOperatorSuite
-        string phase         = 1;
-        string result        = 2;
-        string error_message = 3;
+        ComplianceOperatorScanStatusPhase  phase           = 1;
+        ComplianceOperatorScanStatusResult  result         = 2;
+        string  error_message   = 3;
+        repeated    ComplianceOperatorCondition conditions = 4;
     }
 
-    Status status = 3;
+    Status  status = 3;
 }
+
+//// ResultNot available represents the compliance scan not having finished yet
+//    ResultNotAvailable ComplianceScanStatusResult = "NOT-AVAILABLE"
+//// ResultCompliant represents the compliance scan having succeeded
+//    ResultCompliant ComplianceScanStatusResult = "COMPLIANT"
+//// ResultNotApplicable represents the compliance scan having no useful results after finished
+//    ResultNotApplicable ComplianceScanStatusResult = "NOT-APPLICABLE"
+//// ResultError represents a compliance scan pod having failed to run the scan or encountered an error
+//    ResultError ComplianceScanStatusResult = "ERROR"
+//// ResultNonCompliant represents the compliance scan having found a gap
+//    ResultNonCompliant ComplianceScanStatusResult = "NON-COMPLIANT"
+//// ResultInconsistent represents checks differing across the machines
+//    ResultInconsistent ComplianceScanStatusResult = "INCONSISTENT"
+
+enum ComplianceOperatorScanStatusResult {
+    RESULT_NOT_AVAILABLE   = 0;
+    RESILT_COMPLIANT       = 1;
+    RESULT_NOT_APPLICABLE  = 2;
+    RESULT_ERROR           = 3;
+    RESULT_NON_COMPLIANT   = 4;
+    RESULT_INCONSISTENT    = 5;
+}
+
+// Condition represents an observation of an object's state. Conditions are an
+// extension mechanism intended to be used when the details of an observation
+// are not a priori known or would not apply to all instances of a given Kind.
+//
+// Conditions should be added to explicitly convey properties that users and
+// components care about rather than requiring those properties to be inferred
+// from other observations. Once defined, the meaning of a Condition can not be
+// changed arbitrarily - it becomes part of the API, and has the same
+// backwards- and forwards-compatibility concerns of any other part of the API.
+// Condition represents an observation of an object's state. Conditions are an
+// extension mechanism intended to be used when the details of an observation
+// are not a priori known or would not apply to all instances of a given Kind.
+//
+// Conditions should be added to explicitly convey properties that users and
+// components care about rather than requiring those properties to be inferred
+// from other observations. Once defined, the meaning of a Condition can not be
+// changed arbitrarily - it becomes part of the API, and has the same
+// backwards- and forwards-compatibility concerns of any other part of the API.
+//    type Condition struct {
+//Type               ConditionType          `json:"type"`
+//    Status             corev1.ConditionStatus `json:"status"`
+//    Reason             ConditionReason        `json:"reason,omitempty"`
+//    Message            string                 `json:"message,omitempty"`
+//LastTransitionTime metav1.Time            `json:"lastTransitionTime,omitempty"`
+//    }
+
+// Next Tag: 6
+// ComplianceOperatorCondition represents a set of scans with the status
+// TODO(cdu): Boo has another definition in PR 9505. May need to replace this
+message ComplianceOperatorCondition {
+    enum Status {
+        UNKNOWN = 0;
+        TRUE = 1;
+        FALSE = 2;
+    }
+    Status                      status = 1;
+    string                      reason = 2;
+    string                      message = 3;
+    string                      type = 4;
+    google.protobuf.Timestamp   last_transition_time = 5;
+}
+
