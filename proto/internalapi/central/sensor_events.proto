@@ -17,6 +17,7 @@ import "storage/policy.proto";
 import "storage/process_indicator.proto";
 import "storage/image_integration.proto";
 import "storage/compliance_operator.proto";
+import "storage/compliance_suite.proto";
 
 package central;
 
@@ -53,7 +54,7 @@ message Timing {
     int64  nanos      = 3;
 }
 
-// Next tag: 31.
+// Next tag: 32.
 message SensorEvent {
     // These fields may be duplicated in the individual events, but avoid the need to branch all the time
     string          id                           = 1;
@@ -98,6 +99,7 @@ message SensorEvent {
         ComplianceOperatorProfileV2       compliance_operator_profile_v2 = 28;
         ComplianceOperatorRuleV2          compliance_operator_rule_v2    = 29;
         ComplianceOperatorScanV2          compliance_operator_scan_v2    = 30;
+        ComplianceOperatorSuite           compliance_operator_suite      = 31;
     }
 }
 

@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"reflect"
 
+	v1 "github.com/stackrox/rox/generated/api/v1"
 	"github.com/stackrox/rox/generated/storage"
 	"github.com/stackrox/rox/pkg/features"
 	"github.com/stackrox/rox/pkg/postgres"
 	"github.com/stackrox/rox/pkg/postgres/walker"
 	"github.com/stackrox/rox/pkg/sac/resources"
+	"github.com/stackrox/rox/pkg/search"
+	"github.com/stackrox/rox/pkg/search/postgres/mapping"
 )
 
 var (
@@ -34,8 +37,10 @@ var (
 		schema.ResolveReferences(func(messageTypeName string) *walker.Schema {
 			return referencedSchemas[fmt.Sprintf("storage.%s", messageTypeName)]
 		})
+		schema.SetOptionsMap(search.Walk(v1.SearchCategory_COMPLIANCE_SUITES, "complianceoperatorsuite", (*storage.ComplianceOperatorSuite)(nil)))
 		schema.ScopingResource = resources.ComplianceOperator
 		RegisterTable(schema, CreateTableComplianceOperatorSuitesStmt, features.ComplianceEnhancements.Enabled)
+		mapping.RegisterCategoryToTable(v1.SearchCategory_COMPLIANCE_SUITES, schema)
 		return schema
 	}()
 )
@@ -47,7 +52,8 @@ const (
 
 // ComplianceOperatorSuites holds the Gorm model for Postgres table `compliance_operator_suites`.
 type ComplianceOperatorSuites struct {
-	Name       string `gorm:"column:name;type:varchar;primaryKey"`
-	ClusterID  string `gorm:"column:clusterid;type:varchar;primaryKey"`
+	ID         string `gorm:"column:id;type:uuid;primaryKey"`
+	Name       string `gorm:"column:name;type:varchar"`
+	ClusterID  string `gorm:"column:clusterid;type:uuid;index:complianceoperatorsuites_sac_filter,type:btree"`
 	Serialized []byte `gorm:"column:serialized;type:bytea"`
 }

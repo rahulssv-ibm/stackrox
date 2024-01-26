@@ -58,7 +58,7 @@ func (s *ComplianceOperatorSuitesStoreSuite) TestStore() {
 	complianceOperatorSuite := &storage.ComplianceOperatorSuite{}
 	s.NoError(testutils.FullInit(complianceOperatorSuite, testutils.SimpleInitializer(), testutils.JSONFieldsFilter))
 
-	foundComplianceOperatorSuite, exists, err := store.Get(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+	foundComplianceOperatorSuite, exists, err := store.Get(ctx, complianceOperatorSuite.GetId())
 	s.NoError(err)
 	s.False(exists)
 	s.Nil(foundComplianceOperatorSuite)
@@ -66,7 +66,7 @@ func (s *ComplianceOperatorSuitesStoreSuite) TestStore() {
 	withNoAccessCtx := sac.WithNoAccess(ctx)
 
 	s.NoError(store.Upsert(ctx, complianceOperatorSuite))
-	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetId())
 	s.NoError(err)
 	s.True(exists)
 	s.Equal(complianceOperatorSuite, foundComplianceOperatorSuite)
@@ -78,23 +78,23 @@ func (s *ComplianceOperatorSuitesStoreSuite) TestStore() {
 	s.NoError(err)
 	s.Zero(complianceOperatorSuiteCount)
 
-	complianceOperatorSuiteExists, err := store.Exists(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+	complianceOperatorSuiteExists, err := store.Exists(ctx, complianceOperatorSuite.GetId())
 	s.NoError(err)
 	s.True(complianceOperatorSuiteExists)
 	s.NoError(store.Upsert(ctx, complianceOperatorSuite))
 	s.ErrorIs(store.Upsert(withNoAccessCtx, complianceOperatorSuite), sac.ErrResourceAccessDenied)
 
-	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetId())
 	s.NoError(err)
 	s.True(exists)
 	s.Equal(complianceOperatorSuite, foundComplianceOperatorSuite)
 
-	s.NoError(store.Delete(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId()))
-	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+	s.NoError(store.Delete(ctx, complianceOperatorSuite.GetId()))
+	foundComplianceOperatorSuite, exists, err = store.Get(ctx, complianceOperatorSuite.GetId())
 	s.NoError(err)
 	s.False(exists)
 	s.Nil(foundComplianceOperatorSuite)
-	s.ErrorIs(store.Delete(withNoAccessCtx, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId()), sac.ErrResourceAccessDenied)
+	s.ErrorIs(store.Delete(withNoAccessCtx, complianceOperatorSuite.GetId()), sac.ErrResourceAccessDenied)
 
 	var complianceOperatorSuites []*storage.ComplianceOperatorSuite
 	var complianceOperatorSuiteIDs []string
@@ -102,7 +102,7 @@ func (s *ComplianceOperatorSuitesStoreSuite) TestStore() {
 		complianceOperatorSuite := &storage.ComplianceOperatorSuite{}
 		s.NoError(testutils.FullInit(complianceOperatorSuite, testutils.UniqueInitializer(), testutils.JSONFieldsFilter))
 		complianceOperatorSuites = append(complianceOperatorSuites, complianceOperatorSuite)
-		complianceOperatorSuiteIDs = append(complianceOperatorSuiteIDs, complianceOperatorSuite.GetName(), complianceOperatorSuite.GetClusterId())
+		complianceOperatorSuiteIDs = append(complianceOperatorSuiteIDs, complianceOperatorSuite.GetId())
 	}
 
 	s.NoError(store.UpsertMany(ctx, complianceOperatorSuites))

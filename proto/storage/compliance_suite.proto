@@ -19,21 +19,21 @@ enum ComplianceOperatorScanStatusPhase {
     PHASE_DONE = 4;
 }
 
-// Next Tag: 5
+// Next Tag: 6
 // ComplianceOperatorSuite represents a set of scans with the status
 message ComplianceOperatorSuite {
-    string name       = 1 [(gogoproto.moretags) = 'search:"Compliance Suite Name,hidden" sql:"pk"'];
-    string cluster_id = 2 [(gogoproto.moretags) = 'sql:"pk,fk(Cluster:id),no-fk-constraint"'];
-    // string namespace = 3 [(gogoproto.moretags) = 'Namespace,store" sql:"pk"'];
+    string id           = 1 [(gogoproto.moretags) = 'sql:"pk,id,type(uuid)"'];
+    string name         = 2 [(gogoproto.moretags) = 'search:"Compliance Suite Name,hidden"'];
+    string cluster_id   = 3 [(gogoproto.moretags) = 'search:"Cluster ID,hidden" sql:"fk(Cluster:id),no-fk-constraint,type(uuid)"'];
 
     message Status {
-        ComplianceOperatorScanStatusPhase  phase           = 1;
-        ComplianceOperatorScanStatusResult  result         = 2;
+        string  phase           = 1;
+        string  result         = 2;
         string  error_message   = 3;
-        repeated    ComplianceOperatorCondition conditions = 4;
+        // repeated    ComplianceOperatorCondition conditions = 4; TODO(cdu) uncomment on merge
     }
 
-    Status  status = 3;
+    Status  status = 5;
 }
 
 //// ResultNot available represents the compliance scan not having finished yet
@@ -87,16 +87,16 @@ enum ComplianceOperatorScanStatusResult {
 // Next Tag: 6
 // ComplianceOperatorCondition represents a set of scans with the status
 // TODO(cdu): Boo has another definition in PR 9505. May need to replace this
-message ComplianceOperatorCondition {
-    enum Status {
-        UNKNOWN = 0;
-        TRUE = 1;
-        FALSE = 2;
-    }
-    Status                      status = 1;
-    string                      reason = 2;
-    string                      message = 3;
-    string                      type = 4;
-    google.protobuf.Timestamp   last_transition_time = 5;
-}
+//message ComplianceOperatorCondition {
+//    enum Status {
+//        UNKNOWN = 0;
+//        TRUE = 1;
+//        FALSE = 2;
+//    }
+//    Status                      status = 1;
+//    string                      reason = 2;
+//    string                      message = 3;
+//    string                      type = 4;
+//    google.protobuf.Timestamp   last_transition_time = 5;
+//}
 

@@ -106,7 +106,8 @@
                 "ADMINISTRATION_USAGE",
                 "COMPLIANCE_PROFILES",
                 "COMPLIANCE_PROFILE_CLUSTER_EDGE",
-                "COMPLIANCE_RULES"
+                "COMPLIANCE_RULES",
+                "COMPLIANCE_SUITES"
               ]
             },
             "collectionFormat": "multi"
@@ -212,7 +213,8 @@
                 "ADMINISTRATION_USAGE",
                 "COMPLIANCE_PROFILES",
                 "COMPLIANCE_PROFILE_CLUSTER_EDGE",
-                "COMPLIANCE_RULES"
+                "COMPLIANCE_RULES",
+                "COMPLIANCE_SUITES"
               ]
             },
             "collectionFormat": "multi"
@@ -312,7 +314,8 @@
                 "ADMINISTRATION_USAGE",
                 "COMPLIANCE_PROFILES",
                 "COMPLIANCE_PROFILE_CLUSTER_EDGE",
-                "COMPLIANCE_RULES"
+                "COMPLIANCE_RULES",
+                "COMPLIANCE_SUITES"
               ]
             },
             "collectionFormat": "multi"
@@ -461,10 +464,11 @@
         "ADMINISTRATION_USAGE",
         "COMPLIANCE_PROFILES",
         "COMPLIANCE_PROFILE_CLUSTER_EDGE",
-        "COMPLIANCE_RULES"
+        "COMPLIANCE_RULES",
+        "COMPLIANCE_SUITES"
       ],
       "default": "SEARCH_UNSET",
-      "title": "Next available tag: 65"
+      "title": "Next available tag: 67"
     },
     "v1SearchOptionsResponse": {
       "type": "object",

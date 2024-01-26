@@ -13,6 +13,7 @@ import (
 	"github.com/stackrox/rox/pkg/logging"
 	ops "github.com/stackrox/rox/pkg/metrics"
 	"github.com/stackrox/rox/pkg/postgres"
+	"github.com/stackrox/rox/pkg/postgres/pgutils"
 	pkgSchema "github.com/stackrox/rox/pkg/postgres/schema"
 	"github.com/stackrox/rox/pkg/sac/resources"
 	pgSearch "github.com/stackrox/rox/pkg/search/postgres"
@@ -36,18 +37,20 @@ type storeType = storage.ComplianceOperatorSuite
 type Store interface {
 	Upsert(ctx context.Context, obj *storeType) error
 	UpsertMany(ctx context.Context, objs []*storeType) error
-	Delete(ctx context.Context, name string, clusterID string) error
+	Delete(ctx context.Context, id string) error
 	DeleteByQuery(ctx context.Context, q *v1.Query) ([]string, error)
 	DeleteMany(ctx context.Context, identifiers []string) error
 
 	Count(ctx context.Context) (int, error)
-	Exists(ctx context.Context, name string, clusterID string) (bool, error)
+	Exists(ctx context.Context, id string) (bool, error)
 
-	Get(ctx context.Context, name string, clusterID string) (*storeType, bool, error)
+	Get(ctx context.Context, id string) (*storeType, bool, error)
+	GetByQuery(ctx context.Context, query *v1.Query) ([]*storeType, error)
 	GetMany(ctx context.Context, identifiers []string) ([]*storeType, []int, error)
 	GetIDs(ctx context.Context) ([]string, error)
 
 	Walk(ctx context.Context, fn func(obj *storeType) error) error
+	WalkByQuery(ctx context.Context, query *v1.Query, fn func(obj *storeType) error) error
 }
 
 // New returns a new Store instance using the provided sql instance.
@@ -68,7 +71,7 @@ func New(db postgres.DB) Store {
 // region Helper functions
 
 func pkGetter(obj *storeType) string {
-	return obj.GetName()
+	return obj.GetId()
 }
 
 func metricsSetPostgresOperationDurationTime(start time.Time, op ops.Op) {
@@ -88,12 +91,13 @@ func insertIntoComplianceOperatorSuites(batch *pgx.Batch, obj *storage.Complianc
 
 	values := []interface{}{
 		// parent primary keys start
+		pgutils.NilOrUUID(obj.GetId()),
 		obj.GetName(),
-		obj.GetClusterId(),
+		pgutils.NilOrUUID(obj.GetClusterId()),
 		serialized,
 	}
 
-	finalStr := "INSERT INTO compliance_operator_suites (Name, ClusterId, serialized) VALUES($1, $2, $3) ON CONFLICT(Name, ClusterId) DO UPDATE SET Name = EXCLUDED.Name, ClusterId = EXCLUDED.ClusterId, serialized = EXCLUDED.serialized"
+	finalStr := "INSERT INTO compliance_operator_suites (Id, Name, ClusterId, serialized) VALUES($1, $2, $3, $4) ON CONFLICT(Id) DO UPDATE SET Id = EXCLUDED.Id, Name = EXCLUDED.Name, ClusterId = EXCLUDED.ClusterId, serialized = EXCLUDED.serialized"
 	batch.Queue(finalStr, values...)
 
 	return nil
@@ -111,6 +115,7 @@ func copyFromComplianceOperatorSuites(ctx context.Context, s pgSearch.Deleter, t
 	deletes := make([]string, 0, batchSize)
 
 	copyCols := []string{
+		"id",
 		"name",
 		"clusterid",
 		"serialized",
@@ -128,13 +133,14 @@ func copyFromComplianceOperatorSuites(ctx context.Context, s pgSearch.Deleter, t
 		}
 
 		inputRows = append(inputRows, []interface{}{
+			pgutils.NilOrUUID(obj.GetId()),
 			obj.GetName(),
-			obj.GetClusterId(),
+			pgutils.NilOrUUID(obj.GetClusterId()),
 			serialized,
 		})
 
 		// Add the ID to be deleted.
-		deletes = append(deletes, obj.GetName(), obj.GetClusterId())
+		deletes = append(deletes, obj.GetId())
 
 		// if we hit our batch size we need to push the data
 		if (idx+1)%batchSize == 0 || idx == len(objs)-1 {
