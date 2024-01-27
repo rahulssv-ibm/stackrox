@@ -19,7 +19,7 @@ enum ComplianceOperatorScanStatusPhase {
     PHASE_DONE = 4;
 }
 
-// Next Tag: 6
+// Next Tag: 5
 // ComplianceOperatorSuite represents a set of scans with the status
 message ComplianceOperatorSuite {
     string id           = 1 [(gogoproto.moretags) = 'sql:"pk,id,type(uuid)"'];
@@ -33,7 +33,7 @@ message ComplianceOperatorSuite {
         // repeated    ComplianceOperatorCondition conditions = 4; TODO(cdu) uncomment on merge
     }
 
-    Status  status = 5;
+    Status  status = 4;
 }
 
 //// ResultNot available represents the compliance scan not having finished yet

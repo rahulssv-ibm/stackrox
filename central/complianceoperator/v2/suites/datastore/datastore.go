@@ -16,6 +16,9 @@ type DataStore interface {
 	// GetSuite returns the suite for the given name
 	GetSuite(ctx context.Context, name string) (*storage.ComplianceOperatorSuite, error)
 
+	// GetSuitesByCluster retrieve rules by the cluster
+	GetSuitesByCluster(ctx context.Context, clusterID string) ([]*storage.ComplianceOperatorSuite, error)
+
 	// UpsertSuite adds the suite to the database
 	UpsertSuite(ctx context.Context, suite *storage.ComplianceOperatorSuite) error
 

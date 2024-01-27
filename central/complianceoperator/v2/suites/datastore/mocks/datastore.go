@@ -69,6 +69,21 @@ func (mr *MockDataStoreMockRecorder) GetSuite(ctx, name any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuite", reflect.TypeOf((*MockDataStore)(nil).GetSuite), ctx, name)
 }
 
+// GetSuitesByCluster mocks base method.
+func (m *MockDataStore) GetSuitesByCluster(ctx context.Context, clusterID string) ([]*storage.ComplianceOperatorSuite, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSuitesByCluster", ctx, clusterID)
+	ret0, _ := ret[0].([]*storage.ComplianceOperatorSuite)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSuitesByCluster indicates an expected call of GetSuitesByCluster.
+func (mr *MockDataStoreMockRecorder) GetSuitesByCluster(ctx, clusterID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSuitesByCluster", reflect.TypeOf((*MockDataStore)(nil).GetSuitesByCluster), ctx, clusterID)
+}
+
 // UpsertSuite mocks base method.
 func (m *MockDataStore) UpsertSuite(ctx context.Context, suite *storage.ComplianceOperatorSuite) error {
 	m.ctrl.T.Helper()

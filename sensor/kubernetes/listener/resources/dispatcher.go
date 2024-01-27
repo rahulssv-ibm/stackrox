@@ -101,6 +101,7 @@ func NewDispatcherRegistry(
 		complianceOperatorScanSettingBindingsDispatcher: complianceOperatorDispatchers.NewScanSettingBindingsDispatcher(),
 		complianceOperatorScanDispatcher:                complianceOperatorDispatchers.NewScanDispatcher(),
 		complianceOperatorTailoredProfileDispatcher:     complianceOperatorDispatchers.NewTailoredProfileDispatcher(profileLister),
+		complianceOperatorSuiteDispatcher:               complianceOperatorDispatchers.NewSuitesDispatcher(),
 	}
 }
 
@@ -125,6 +126,7 @@ type registryImpl struct {
 	complianceOperatorRulesDispatcher               *complianceOperatorDispatchers.RulesDispatcher
 	complianceOperatorScanDispatcher                *complianceOperatorDispatchers.ScanDispatcher
 	complianceOperatorTailoredProfileDispatcher     *complianceOperatorDispatchers.TailoredProfileDispatcher
+	complianceOperatorSuiteDispatcher               *complianceOperatorDispatchers.SuitesDispatcher
 }
 
 func wrapWithDumpingDispatcher(d Dispatcher, w io.Writer) Dispatcher {
@@ -303,4 +305,8 @@ func (d *registryImpl) ForComplianceOperatorScans() Dispatcher {
 
 func (d *registryImpl) ForRegistryMirrors() Dispatcher {
 	return wrapDispatcher(d.osRegistryMirrorDispatcher, d.traceWriter)
+}
+
+func (d *registryImpl) ForComplianceOperatorSuites() Dispatcher {
+	return wrapDispatcher(d.complianceOperatorSuiteDispatcher, d.traceWriter)
 }

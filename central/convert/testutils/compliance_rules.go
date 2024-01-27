@@ -15,6 +15,8 @@ var (
 	RuleUID = uuid.NewV4().String()
 
 	ruleID = uuid.NewV4().String()
+
+	SuiteUID = uuid.NewV4().String()
 )
 
 // GetRuleV2SensorMsg -- returns a V2 message from sensor
@@ -102,4 +104,37 @@ func getAnnotations() map[string]string {
 	annotations["compliance.openshift.io/rule"] = "random-rule-name"
 
 	return annotations
+}
+
+// GetSuiteStorage -- returns suite storage
+func GetSuiteStorage(_ *testing.T) *storage.ComplianceOperatorSuite {
+	status := &storage.ComplianceOperatorSuite_Status{
+		Phase:        "DONE",
+		Result:       "NON-COMPLIANT",
+		ErrorMessage: "some error",
+		// Conditions
+	}
+
+	return &storage.ComplianceOperatorSuite{
+		Id:        SuiteUID,
+		Name:      "compliancesuitename",
+		Status:    status,
+		ClusterId: fixtureconsts.Cluster1,
+	}
+}
+
+// GetSuiteSensorMsg -- returns a suite message from sensor
+func GetSuiteSensorMsg(_ *testing.T) *central.ComplianceOperatorSuite {
+	status := &central.ComplianceOperatorSuite_Status{
+		Phase:        "DONE",
+		Result:       "NON-COMPLIANT",
+		ErrorMessage: "some error",
+		// Conditions
+	}
+
+	return &central.ComplianceOperatorSuite{
+		Id:     SuiteUID,
+		Name:   "compliancesuitename",
+		Status: status,
+	}
 }

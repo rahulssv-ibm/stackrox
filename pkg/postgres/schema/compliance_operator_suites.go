@@ -38,7 +38,7 @@ var (
 			return referencedSchemas[fmt.Sprintf("storage.%s", messageTypeName)]
 		})
 		schema.SetOptionsMap(search.Walk(v1.SearchCategory_COMPLIANCE_SUITES, "complianceoperatorsuite", (*storage.ComplianceOperatorSuite)(nil)))
-		schema.ScopingResource = resources.ComplianceOperator
+		schema.ScopingResource = resources.Compliance
 		RegisterTable(schema, CreateTableComplianceOperatorSuitesStmt, features.ComplianceEnhancements.Enabled)
 		mapping.RegisterCategoryToTable(v1.SearchCategory_COMPLIANCE_SUITES, schema)
 		return schema
@@ -54,6 +54,6 @@ const (
 type ComplianceOperatorSuites struct {
 	ID         string `gorm:"column:id;type:uuid;primaryKey"`
 	Name       string `gorm:"column:name;type:varchar"`
-	ClusterID  string `gorm:"column:clusterid;type:uuid;index:complianceoperatorsuites_sac_filter,type:btree"`
+	ClusterID  string `gorm:"column:clusterid;type:uuid;index:complianceoperatorsuites_sac_filter,type:hash"`
 	Serialized []byte `gorm:"column:serialized;type:bytea"`
 }
