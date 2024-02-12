@@ -23,24 +23,28 @@ func TestBasicFilterFunctions(t *testing.T) {
 
 func TestBasicFilter(t *testing.T) {
 	cases := []struct {
-		name     string
-		args     []string
-		expected []bool
+		name               string
+		args               []string
+		expected           []bool
+		maxUniqueProcesses int
 	}{
 		{
-			name:     "general stopping",
-			args:     []string{"1 2 3", "1 2 3", "1 2 3"},
-			expected: []bool{true, true, false},
+			name:               "general stopping",
+			args:               []string{"1 2 3", "1 2 3", "1 2 3"},
+			expected:           []bool{true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
-			name:     "general long stopping",
-			args:     []string{"1 2 3 4 5", "1 2 3 4 5", "1 2 3 4 5"},
-			expected: []bool{true, true, false},
+			name:               "general long stopping",
+			args:               []string{"1 2 3 4 5", "1 2 3 4 5", "1 2 3 4 5"},
+			expected:           []bool{true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
-			name:     "general short stopping",
-			args:     []string{"1", "1", "1"},
-			expected: []bool{true, true, false},
+			name:               "general short stopping",
+			args:               []string{"1", "1", "1"},
+			expected:           []bool{true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
 			name: "fan out check",
@@ -48,30 +52,41 @@ func TestBasicFilter(t *testing.T) {
 			// "process" = fan out of 3
 			// "1" = fan out of 2
 			// "2" = fan out of 1
-			args:     []string{"1 2 3", "1 2 3", "1 2 2"},
-			expected: []bool{true, true, false},
+			args:               []string{"1 2 3", "1 2 3", "1 2 2"},
+			expected:           []bool{true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
-			name:     "varying fan out",
-			args:     []string{"1", "1 2", "1 2 3", "1 2 4"},
-			expected: []bool{true, true, true, false},
+			name:               "varying fan out",
+			args:               []string{"1", "1 2", "1 2 3", "1 2 4"},
+			expected:           []bool{true, true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
-			name:     "high fan out in first level",
-			args:     []string{"1", "2", "3", "4"},
-			expected: []bool{true, true, true, false},
+			name:               "high fan out in first level",
+			args:               []string{"1", "2", "3", "4"},
+			expected:           []bool{true, true, true, false},
+			maxUniqueProcesses: 2,
 		},
 		{
-			name:     "verify failed filters dont impact fan out",
-			args:     []string{"1", "1", "1", "1 2 3"},
-			expected: []bool{true, true, false, true},
+			name:               "verify failed filters dont impact fan out",
+			args:               []string{"1", "1", "1", "1 2 3"},
+			expected:           []bool{true, true, false, true},
+			maxUniqueProcesses: 2,
 		},
+		{
+			name:               "truncate args",
+			args:               []string{"-D user1", "-D user2", "-D user3"},
+			expected:           []bool{true, true, false},
+			maxUniqueProcesses: 10,
+		},
+		{},
 	}
 
 	for _, c := range cases {
 		currCase := c
 		t.Run(currCase.name, func(t *testing.T) {
-			filter := NewFilter(2, 2, []int{3, 2, 1})
+			filter := NewFilter(2, currCase.maxUniqueProcesses, []int{3, 2, 1})
 			for i, arg := range currCase.args {
 				result := filter.Add(&storage.ProcessIndicator{
 					PodId:         "pod",
@@ -82,7 +97,7 @@ func TestBasicFilter(t *testing.T) {
 						Args:         arg,
 					},
 				})
-				assert.Equal(t, currCase.expected[i], result)
+				assert.Equalf(t, currCase.expected[i], result, "expected[%d]", i)
 			}
 		})
 	}

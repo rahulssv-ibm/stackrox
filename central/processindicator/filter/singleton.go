@@ -15,7 +15,7 @@ var (
 
 	maxUniqueProcesses = env.ProcessFilterMaxProcessPaths.IntegerSetting()
 
-	bucketSizes     = []int{8, 6, 4, 2}
+	bucketSizes     = env.BucketSizesConfig.IntegerListSetting()
 	singletonFilter filter.Filter
 )
 
