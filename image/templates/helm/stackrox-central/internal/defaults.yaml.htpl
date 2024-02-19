@@ -172,6 +172,7 @@ defaults:
       metricsPort: 9090
       replicas: 3
       autoscaling:
+        disable: false
         minReplicas: 2
         maxReplicas: 5
       affinity:

@@ -128,6 +128,12 @@ can be configured via those files:
   scanner:
     # Run without StackRox Scanner (NOT RECOMMENDED)
     disable: true
+
+  scannerV4:
+    # Enable Scanner V4, which will become the default scanner for StackRox.
+    # Note that enabling Scanner V4 while having the StackRox Scanner disable (scanner.disable=true)
+    # is not a supported configuration.
+    disable: false
   
   customize:
     # Apply the important-service=true label for all objects managed by this chart.
@@ -174,6 +180,19 @@ helm upgrade -n stackrox stackrox-central-services stackrox/stackrox-central-ser
 Under most circumstances, you will not need to supply the `values-private.yaml` file, unless
 you want changes to sensitive configuration options to be applied.
 
-Of course you can also specify configuration values via the `--set` or `--set-file` command-line
-flags. However, these options will be forgotten with the next `helm upgrade` invocation, unless
-you supply them again.
+Alternatively, you can also use the `--reuse-values` for the `helm upgrade` command. This flag
+causes values which were previously passed via `--values / -f`, `--set` or `--set-file` to be
+automatially passed again to the Helm chart rendering.
+
+### Passing Generated Values
+
+The Helm chart can conveniently automatically generate certain sensitive data objects. This includes
+passwords, keys and certificates. In case such data objects were generated during the rendering
+of the Helm chart, a command is printed as part of the post-installation notes which can be used
+for retrieving them and storing them in a file `generated-valutes.yaml`.
+
+...
+
+### Enabling Scanner V4
+
+...
