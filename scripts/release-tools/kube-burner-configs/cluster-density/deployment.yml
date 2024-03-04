@@ -28,6 +28,9 @@ spec:
             memory: "150Mi"
             cpu: "250m"
         volumeMounts:
+        - name: config
+          mountPath: "/etc/berserker"
+          readOnly: true
         - name: secret-1
           mountPath: /secret1
         - name: secret-2
@@ -63,6 +66,12 @@ spec:
         - name: ENVVAR4
           value: "250"
       volumes:
+      - name: config
+        configMap:
+          name: {{.JobName}}-berserker-process-config
+          items:
+          - key: workload.toml
+            path: workload.toml
       - name: secret-1
         secret:
           secretName: {{.JobName}}-1
