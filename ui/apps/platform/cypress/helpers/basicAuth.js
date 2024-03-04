@@ -3,7 +3,11 @@ export default () => {
     const token = Cypress.env('ROX_AUTH_TOKEN');
     if (token) {
         beforeEach(() => {
-            localStorage.setItem('access_token', token);
+            cy.intercept('*', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
         });
     }
 };
