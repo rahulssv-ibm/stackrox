@@ -52,3 +52,6 @@ jobs:
 
       - objectTemplate: berserker-configmap-endpoints-zipf.yml
         replicas: 10
+
+      - objectTemplate: berserker-configmap-process.yml
+        replicas: 10
