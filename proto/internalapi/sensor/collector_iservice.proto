@@ -15,5 +15,5 @@ message MsgToCollector {
 message MsgFromCollector {}
 
 service CollectorService {
-  rpc Communicate(stream MsgFromCollector) returns (stream MsgFromCollector);
+  rpc Communicate(stream MsgFromCollector) returns (stream MsgToCollector);
 }
