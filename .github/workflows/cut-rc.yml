@@ -220,8 +220,8 @@ jobs:
             { "type": "divider" },
 
             { "type": "section", "text": { "type": "mrkdwn", "text":
-            ":arrow_right: *Please assist the PR assignees in merging their changes to `${{needs.variables.outputs.branch}}` branch
-            and then re-run failed jobs of the <${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}|workflow run>.*" }},
+            ":arrow_right: *Please assist the PR assignees in making a new PR for their changes to the `${{needs.variables.outputs.branch}}` branch,
+            and adding the new PR to this milestone. When it is approved and merged, you can try closing the milestone again.
 
             { "type": "section", "text": { "type": "mrkdwn", "text":
             ">
