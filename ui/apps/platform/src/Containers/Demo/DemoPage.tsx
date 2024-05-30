@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     CodeBlock,
     CodeBlockCode,
@@ -12,12 +12,20 @@ import {
 import PageTitle from 'Components/PageTitle';
 import CompoundSearchFilter from 'Components/CompoundSearchFilter/components/CompoundSearchFilter';
 import { compoundSearchFilter } from 'Components/CompoundSearchFilter/types';
+import useURLSearch from 'hooks/useURLSearch';
 
 function DemoPage() {
-    const [history, setHistory] = useState<string[]>([]);
+    const { searchFilter, setSearchFilter } = useURLSearch();
+
     const historyHeader = '//// Search History ////';
-    const historyText = `\n\n${history.join('\n')}`;
+    const historyText = `\n\n${Object.keys(searchFilter)
+        .map((searchKey) => {
+            const searchValue = searchFilter[searchKey];
+            return `${searchKey}: ${Array.isArray(searchValue) ? searchValue.join(',') : searchValue}`;
+        })
+        .join('\n')}`;
     const content = `${historyHeader}${history.length !== 0 ? historyText : ''}`;
+
     return (
         <>
             <PageTitle title="Demo - Advanced Filters" />
@@ -41,14 +49,15 @@ function DemoPage() {
                     >
                         <CompoundSearchFilter
                             config={compoundSearchFilter}
-                            onSearch={(value) => {
-                                setHistory((prevState: string[]) => {
-                                    return [...prevState, value];
+                            onSearch={(searchKey, searchValue) => {
+                                setSearchFilter({
+                                    ...searchFilter,
+                                    [searchKey]: searchValue,
                                 });
                             }}
                         />
                         <CodeBlock>
-                            <CodeBlockCode id="code-content">{content}</CodeBlockCode>{' '}
+                            <CodeBlockCode id="code-content">{content}</CodeBlockCode>
                         </CodeBlock>
                     </Flex>
                 </PageSection>
