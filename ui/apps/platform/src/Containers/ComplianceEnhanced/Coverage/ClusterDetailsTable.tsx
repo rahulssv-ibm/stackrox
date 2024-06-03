@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { generatePath, Link } from 'react-router-dom';
-import { Button, ButtonVariant, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import {
+    Button,
+    ButtonVariant,
+    Pagination,
+    Text,
+    TextVariants,
+    Toolbar,
+    ToolbarContent,
+    ToolbarItem,
+    Tooltip,
+} from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 
 import IconText from 'Components/PatternFly/IconText/IconText';
 import TbodyUnified from 'Components/TableStateTemplates/TbodyUnified';
+import { UseURLPaginationResult } from 'hooks/useURLPagination';
 import { ComplianceCheckResult } from 'services/ComplianceResultsService';
 import { TableUIState } from 'utils/getTableUIState';
 
@@ -14,20 +25,42 @@ import CheckStatusModal from './components/CheckStatusModal';
 
 export type ClusterDetailsTableProps = {
     clusterId: string;
+    checkResultsCount: number;
+    pagination: UseURLPaginationResult;
     profileName: string;
     tableState: TableUIState<ComplianceCheckResult>;
 };
 
-function ClusterDetailsTable({ clusterId, profileName, tableState }: ClusterDetailsTableProps) {
+function ClusterDetailsTable({
+    clusterId,
+    checkResultsCount,
+    pagination,
+    profileName,
+    tableState,
+}: ClusterDetailsTableProps) {
+    const { page, perPage, setPage, setPerPage } = pagination;
     const [selectedCheckResult, setSelectedCheckResult] = useState<ComplianceCheckResult | null>(
         null
     );
     return (
         <>
+            <Toolbar>
+                <ToolbarContent>
+                    <ToolbarItem variant="pagination" align={{ default: 'alignRight' }}>
+                        <Pagination
+                            itemCount={checkResultsCount}
+                            page={page}
+                            perPage={perPage}
+                            onSetPage={(_, newPage) => setPage(newPage)}
+                            onPerPageSelect={(_, newPerPage) => setPerPage(newPerPage)}
+                        />
+                    </ToolbarItem>
+                </ToolbarContent>
+            </Toolbar>
             <Table>
                 <Thead>
                     <Tr>
-                        <Th>Cluster</Th>
+                        <Th>Checks</Th>
                         <Td modifier="fitContent" width={10}>
                             Controls
                         </Td>

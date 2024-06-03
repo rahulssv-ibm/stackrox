@@ -16,12 +16,14 @@ import {
 import BreadcrumbItemLink from 'Components/BreadcrumbItemLink';
 import PageTitle from 'Components/PageTitle';
 import useRestQuery from 'hooks/useRestQuery';
+import useURLPagination from 'hooks/useURLPagination';
 import { getTableUIState } from 'utils/getTableUIState';
 import { getAxiosErrorMessage } from 'utils/responseErrorUtils';
 import { getComplianceProfileClusterResults } from 'services/ComplianceResultsService';
 
 import ClusterDetailsTable from './ClusterDetailsTable';
 import ClusterProfilesProvider, { ClusterProfilesContext } from './ClusterProfilesProvider';
+import { DEFAULT_COMPLIANCE_PAGE_SIZE } from '../compliance.constants';
 import {
     coverageProfileClustersPath,
     coverageClusterDetailsPath,
@@ -42,6 +44,8 @@ function ClusterDetailsPage() {
 
 function ClusterDetailsContent() {
     const { clusterId, profileName } = useParams();
+    const pagination = useURLPagination(DEFAULT_COMPLIANCE_PAGE_SIZE);
+    const { page, perPage } = pagination;
     const {
         clusterProfileData,
         isLoading: isLoadingClusterProfileData,
@@ -49,8 +53,12 @@ function ClusterDetailsContent() {
     } = useContext(ClusterProfilesContext);
 
     const fetchCheckResults = useCallback(
-        () => getComplianceProfileClusterResults(profileName, clusterId),
-        [clusterId, profileName]
+        () =>
+            getComplianceProfileClusterResults(profileName, clusterId, {
+                page,
+                perPage,
+            }),
+        [clusterId, page, perPage, profileName]
     );
     const {
         data: checkResultsResponse,
@@ -139,6 +147,8 @@ function ClusterDetailsContent() {
             <PageSection>
                 <ClusterDetailsTable
                     clusterId={clusterId}
+                    checkResultsCount={checkResultsResponse?.totalCount ?? 0}
+                    pagination={pagination}
                     profileName={profileName}
                     tableState={tableState}
                 />
