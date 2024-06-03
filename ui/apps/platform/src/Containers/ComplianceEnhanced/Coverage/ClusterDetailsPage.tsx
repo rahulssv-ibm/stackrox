@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { generatePath, useParams } from 'react-router-dom';
 import {
     Alert,
@@ -15,8 +15,12 @@ import {
 
 import BreadcrumbItemLink from 'Components/BreadcrumbItemLink';
 import PageTitle from 'Components/PageTitle';
+import useRestQuery from 'hooks/useRestQuery';
+import { getTableUIState } from 'utils/getTableUIState';
 import { getAxiosErrorMessage } from 'utils/responseErrorUtils';
+import { getComplianceProfileClusterResults } from 'services/ComplianceResultsService';
 
+import ClusterDetailsTable from './ClusterDetailsTable';
 import ClusterProfilesProvider, { ClusterProfilesContext } from './ClusterProfilesProvider';
 import {
     coverageProfileClustersPath,
@@ -43,6 +47,23 @@ function ClusterDetailsContent() {
         isLoading: isLoadingClusterProfileData,
         error: clusterProfileDataError,
     } = useContext(ClusterProfilesContext);
+
+    const fetchCheckResults = useCallback(
+        () => getComplianceProfileClusterResults(profileName, clusterId),
+        [clusterId, profileName]
+    );
+    const {
+        data: checkResultsResponse,
+        loading: isLoadingCheckResults,
+        error: checkResultsError,
+    } = useRestQuery(fetchCheckResults);
+
+    const tableState = getTableUIState({
+        isLoading: isLoadingCheckResults,
+        data: checkResultsResponse?.checkResults,
+        error: checkResultsError,
+        searchFilter: {},
+    });
 
     if (clusterProfileDataError) {
         return (
@@ -113,6 +134,13 @@ function ClusterDetailsContent() {
                 <ProfilesToggleGroup
                     profiles={clusterProfileData.scanStats}
                     route={coverageClusterDetailsPath.replace(':clusterId', clusterId)}
+                />
+            </PageSection>
+            <PageSection>
+                <ClusterDetailsTable
+                    clusterId={clusterId}
+                    profileName={profileName}
+                    tableState={tableState}
                 />
             </PageSection>
         </>
