@@ -148,7 +148,9 @@ func (c *endpointsTestCase) verifyDialResult(t *testing.T, conn *tls.Conn, err e
 		_ = conn.SetReadDeadline(time.Now().Add(timeout))
 		_, err = conn.Read(make([]byte, 1))
 	}
-	assert.EqualErrorf(t, err, "remote error: tls: certificate required", "expected a bad certificate error after handshake")
+	if assert.Error(t, err, "expected an error after TLS handshake") {
+		assert.Equalf(t, err.Error(), "remote error: tls: bad certificate", "expected a bad certificate error after handshake, got: %v", err)
+	}
 }
 
 func (c *endpointsTestCase) runConnectionTest(t *testing.T, testCtx *endpointsTestContext) {
