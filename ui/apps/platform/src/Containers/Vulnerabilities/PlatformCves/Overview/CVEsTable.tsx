@@ -13,7 +13,6 @@ import {
     Td,
 } from '@patternfly/react-table';
 import { gql, useQuery } from '@apollo/client';
-import sum from 'lodash/sum';
 
 import useURLPagination from 'hooks/useURLPagination';
 import useMap from 'hooks/useMap';
@@ -38,10 +37,10 @@ import {
 import CVESelectionTh from '../../components/CVESelectionTh';
 import CVESelectionTd from '../../components/CVESelectionTd';
 import PartialCVEDataAlert from '../../components/PartialCVEDataAlert';
-import { sortCveDistroList } from '../../utils/sortUtils';
 import { getPlatformEntityPagePath } from '../../utils/searchUtils';
 import { QuerySearchFilter } from '../../types';
 import usePlatformCves from './usePlatformCves';
+import { displayCveType } from '../utils/stringUtils';
 
 const totalClusterCountQuery = gql`
     query getTotalClusterCount {
@@ -150,16 +149,14 @@ function CVEsTable({
                             isFixable,
                             cveType,
                             cvss,
-                            scoreVersion,
-                            distroTuples,
-                            clusterCountByType,
+                            clusterVulnerability: { summary, scoreVersion },
+                            clusterCountByPlatformType,
                         } = platformCve;
                         const isExpanded = expandedRowSet.has(cve);
 
-                        const prioritizedDistros = sortCveDistroList(distroTuples);
-                        const summary =
-                            prioritizedDistros.length > 0 ? prioritizedDistros[0].summary : '';
-                        const affectedClusterCount = sum(Object.values(clusterCountByType));
+                        const { generic, kubernetes, openshift, openshift4 } =
+                            clusterCountByPlatformType;
+                        const affectedClusterCount = generic + kubernetes + openshift + openshift4;
 
                         return (
                             <Tbody key={cve} isExpanded={isExpanded}>
@@ -186,7 +183,7 @@ function CVEsTable({
                                     <Td dataLabel="CVE status">
                                         <VulnerabilityFixableIconText isFixable={isFixable} />
                                     </Td>
-                                    <Td dataLabel="CVE type">{cveType}</Td>
+                                    <Td dataLabel="CVE type">{displayCveType(cveType)}</Td>
                                     <Td dataLabel="CVSS">
                                         <CvssFormatted cvss={cvss} scoreVersion={scoreVersion} />
                                     </Td>
