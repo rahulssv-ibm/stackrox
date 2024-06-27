@@ -71,6 +71,7 @@ func TestInstanceConfig(t *testing.T) {
 				assert.Equal(t, test.expectedKey, cfg.StorageKey)
 				assert.Equal(t, "test-id", cfg.ClientID)
 				assert.Equal(t, devVersion, props["Central version"])
+				assert.Equal(t, devVersion, cfg.ClientVersion)
 			} else {
 				assert.Empty(t, key, "Telemetry must be disabled")
 			}

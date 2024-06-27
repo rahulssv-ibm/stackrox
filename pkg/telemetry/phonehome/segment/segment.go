@@ -54,7 +54,7 @@ func (*logOnFailure) Failure(msg segment.Message, err error) {
 
 // NewTelemeter creates and initializes a Segment telemeter instance.
 // Default interval is 5s, default batch size is 250.
-func NewTelemeter(key, endpoint, clientID, clientType string, interval time.Duration, batchSize int) *segmentTelemeter {
+func NewTelemeter(key, endpoint, clientID, clientType, clientVersion string, interval time.Duration, batchSize int) *segmentTelemeter {
 	segmentConfig := segment.Config{
 		Endpoint:  endpoint,
 		Interval:  interval,
@@ -66,6 +66,9 @@ func NewTelemeter(key, endpoint, clientID, clientType string, interval time.Dura
 			Device: segment.DeviceInfo{
 				Id:   clientID,
 				Type: clientType,
+			},
+			App: segment.AppInfo{
+				Version: clientVersion,
 			},
 		},
 	}
@@ -167,6 +170,14 @@ func (t *segmentTelemeter) makeContext(o *telemeter.CallOptions) *segment.Contex
 		ctx.Device = segment.DeviceInfo{
 			Id:   o.ClientID,
 			Type: o.ClientType,
+		}
+	}
+	if o.ClientVersion != "" {
+		if ctx == nil {
+			ctx = &segment.Context{}
+		}
+		ctx.App = segment.AppInfo{
+			Version: o.ClientVersion,
 		}
 	}
 
