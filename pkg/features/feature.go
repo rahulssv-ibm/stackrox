@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+const (
+	techPreviewString = "tech-preview"
+	devPreviewString  = "dev-preview"
+)
+
 type feature struct {
 	envVar       string
 	name         string
@@ -30,6 +35,10 @@ func (f *feature) Enabled() bool {
 		return f.defaultValue
 	}
 
+	if stageFlag := allPerStage[f.Stage()]; f != stageFlag && stageFlag.Enabled() {
+		return true
+	}
+
 	switch strings.ToLower(os.Getenv(f.envVar)) {
 	case "false":
 		return false
@@ -42,7 +51,7 @@ func (f *feature) Enabled() bool {
 
 func (f *feature) Stage() string {
 	if f.techPreview {
-		return "tech-preview"
+		return techPreviewString
 	}
-	return "dev-preview"
+	return devPreviewString
 }

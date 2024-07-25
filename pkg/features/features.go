@@ -19,6 +19,11 @@ type FeatureFlag interface {
 var (
 	// Flags contains all defined FeatureFlags by name.
 	Flags = make(map[string]FeatureFlag)
+
+	allPerStage = map[string]FeatureFlag{
+		devPreviewString:  registerFeature("All dev-preview features", "ROX_ALL_DEV_PREVIEW"),
+		techPreviewString: registerFeature("All tech-preview features", "ROX_ALL_TECH_PREVIEW", techPreview),
+	}
 )
 
 // registerFeature registers and returns a new feature flag, configured with the

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stackrox/rox/pkg/buildinfo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
 type envTest struct {
@@ -112,10 +113,79 @@ func TestOverridesOnReleaseBuilds(t *testing.T) {
 	}
 }
 
-func TestStage(t *testing.T) {
+type FeatureFlagsTestSuite struct {
+	suite.Suite
+	originalFlags map[string]FeatureFlag
+}
+
+var _ suite.SetupTestSuite = (*FeatureFlagsTestSuite)(nil)
+var _ suite.TearDownTestSuite = (*FeatureFlagsTestSuite)(nil)
+
+func TestFeatureFlagsSuite(t *testing.T) {
+	suite.Run(t, new(FeatureFlagsTestSuite))
+}
+
+func (s *FeatureFlagsTestSuite) SetupTest() {
+	s.originalFlags = Flags
+	allDev := allPerStage[devPreviewString]
+	allTech := allPerStage[techPreviewString]
+
+	Flags = map[string]FeatureFlag{
+		allDev.EnvVar():  allDev,
+		allTech.EnvVar(): allTech,
+	}
+}
+
+func (s *FeatureFlagsTestSuite) TearDownTest() {
+	Flags = s.originalFlags
+}
+
+func (s *FeatureFlagsTestSuite) TestStage() {
 	f := registerFeature("test_feat", "ROX_TEST_FEAT")
-	assert.Equal(t, "dev-preview", f.Stage())
+	s.Equal(devPreviewString, f.Stage())
 
 	f = registerFeature("test_feat", "ROX_TEST_FEAT", techPreview)
-	assert.Equal(t, "tech-preview", f.Stage())
+	s.Equal(techPreviewString, f.Stage())
+}
+
+func (s *FeatureFlagsTestSuite) TestAllPerStage() {
+	dev1 := registerFeature("dev1", "ROX_F1")
+	dev2 := registerFeature("dev2", "ROX_F2", withUnchangeable(true))
+	tech1 := registerFeature("tech1", "ROX_F3", techPreview)
+	tech2 := registerFeature("tech2", "ROX_F4", techPreview)
+	allDev := allPerStage[devPreviewString]
+	allTech := allPerStage[techPreviewString]
+
+	s.False(allDev.Enabled())
+	s.False(allTech.Enabled())
+	s.Len(Flags, 6)
+
+	s.False(dev1.Enabled())
+	s.False(dev2.Enabled())
+	s.False(tech1.Enabled())
+	s.False(tech2.Enabled())
+
+	s.T().Setenv(allDev.EnvVar(), "true")
+	s.True(allDev.Enabled())
+	s.False(allTech.Enabled())
+	s.True(dev1.Enabled())
+	s.False(dev2.Enabled())
+	s.False(tech1.Enabled())
+	s.False(tech2.Enabled())
+
+	s.T().Setenv(allTech.EnvVar(), "true")
+	s.True(allDev.Enabled())
+	s.True(allTech.Enabled())
+	s.True(dev1.Enabled())
+	s.False(dev2.Enabled())
+	s.True(tech1.Enabled())
+	s.True(tech2.Enabled())
+
+	s.T().Setenv(allDev.EnvVar(), "false")
+	s.False(allDev.Enabled())
+	s.True(allTech.Enabled())
+	s.False(dev1.Enabled())
+	s.False(dev2.Enabled())
+	s.True(tech1.Enabled())
+	s.True(tech2.Enabled())
 }
