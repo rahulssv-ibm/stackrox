@@ -130,7 +130,7 @@ func insertIntoSecrets(batch *pgx.Batch, obj *storage.Secret) error {
 
 	var query string
 
-	if features.Flags["ROX_SECRET_FILE_SEARCH"].Enabled() {
+	if features.SecretFileSearch.Enabled() {
 		for childIndex, child := range obj.GetFiles() {
 			if err := insertIntoSecretsFiles(batch, child, obj.GetId(), childIndex); err != nil {
 				return err

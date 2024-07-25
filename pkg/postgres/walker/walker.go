@@ -274,7 +274,7 @@ func getPostgresOptions(tag string, topLevel bool, ignorePK, ignoreUnique, ignor
 			opts.ColumnType = typeName
 		case strings.HasPrefix(field, "flag="):
 			flag := stringutils.GetAfter(field, "=")
-			if _, ok := features.Flags[flag]; !ok {
+			if features.FindFlagByVariable(flag) == nil {
 				log.Fatalf("Flag %s is not a valid feature flag", flag)
 			}
 			opts.Flag = flag

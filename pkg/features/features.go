@@ -17,8 +17,8 @@ type FeatureFlag interface {
 }
 
 var (
-	// Flags contains all defined FeatureFlags by name.
-	Flags = make(map[string]FeatureFlag)
+	// Flags contains all defined FeatureFlags.
+	Flags = []FeatureFlag{}
 )
 
 // registerFeature registers and returns a new feature flag, configured with the
@@ -34,6 +34,17 @@ func registerFeature(name, envVar string, options ...option) FeatureFlag {
 	for _, o := range options {
 		o(f)
 	}
-	Flags[f.envVar] = f
+	Flags = append(Flags, f)
 	return f
+}
+
+// FindFlagByVariable searches for the flag with the given variable, and returns
+// the flag if found, and nil otherwise.
+func FindFlagByVariable(envVar string) FeatureFlag {
+	for _, flag := range Flags {
+		if flag.EnvVar() == envVar {
+			return flag
+		}
+	}
+	return nil
 }

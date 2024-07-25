@@ -94,8 +94,8 @@ func (s *searchWalker) handleStruct(prefix string, original reflect.Type) {
 		}
 		if strings.HasPrefix(searchTag, "flag=") {
 			flag := stringutils.GetAfter(searchTag, "=")
-			ff, ok := features.Flags[flag]
-			if !ok {
+			ff := features.FindFlagByVariable(flag)
+			if ff == nil {
 				log.Fatalf("flag %s is not a valid feature flag", flag)
 			}
 			if !ff.Enabled() {
