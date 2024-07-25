@@ -3,6 +3,8 @@ package features
 import (
 	"fmt"
 	"os"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/stackrox/rox/pkg/buildinfo"
@@ -118,4 +120,19 @@ func TestStage(t *testing.T) {
 
 	f = registerFeature("test_feat", "ROX_TEST_FEAT", techPreview)
 	assert.Equal(t, "tech-preview", f.Stage())
+}
+
+func TestNoDups(t *testing.T) {
+	uniqueFlags := Flags
+	slices.SortFunc(uniqueFlags, func(a, b FeatureFlag) int {
+		return strings.Compare(a.EnvVar(), b.EnvVar())
+	})
+	assert.Equal(t, len(Flags), len(slices.Compact(uniqueFlags)))
+}
+
+func TestFindFlag(t *testing.T) {
+	expected := registerFeature("test_feat", "ROX_TEST_FEAT")
+	found := FindFlagByVariable(expected.EnvVar())
+	assert.Equal(t, expected, found)
+	assert.Nil(t, FindFlagByVariable("fake"))
 }
