@@ -35,16 +35,15 @@ func (f *feature) Enabled() bool {
 		return f.defaultValue
 	}
 
-	if stageFlag := allPerStage[f.Stage()]; f != stageFlag && stageFlag.Enabled() {
-		return true
-	}
-
 	switch strings.ToLower(os.Getenv(f.envVar)) {
 	case "false":
 		return false
 	case "true":
 		return true
 	default:
+		if stageFlag := allPerStage[f.Stage()]; f.envVar != stageFlag.EnvVar() && stageFlag.Enabled() {
+			return true
+		}
 		return f.defaultValue
 	}
 }

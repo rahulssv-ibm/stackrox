@@ -156,15 +156,18 @@ func (s *FeatureFlagsTestSuite) TestAllPerStage() {
 	allDev := allPerStage[devPreviewString]
 	allTech := allPerStage[techPreviewString]
 
+	// All flags are registered.
 	s.False(allDev.Enabled())
 	s.False(allTech.Enabled())
 	s.Len(Flags, 6)
 
+	// All flags are disabled.
 	s.False(dev1.Enabled())
 	s.False(dev2.Enabled())
 	s.False(tech1.Enabled())
 	s.False(tech2.Enabled())
 
+	// Only mutable Dev flags are enabled.
 	s.T().Setenv(allDev.EnvVar(), "true")
 	s.True(allDev.Enabled())
 	s.False(allTech.Enabled())
@@ -173,6 +176,7 @@ func (s *FeatureFlagsTestSuite) TestAllPerStage() {
 	s.False(tech1.Enabled())
 	s.False(tech2.Enabled())
 
+	// Tech flags are enabled.
 	s.T().Setenv(allTech.EnvVar(), "true")
 	s.True(allDev.Enabled())
 	s.True(allTech.Enabled())
@@ -181,6 +185,12 @@ func (s *FeatureFlagsTestSuite) TestAllPerStage() {
 	s.True(tech1.Enabled())
 	s.True(tech2.Enabled())
 
+	// Overriden value is respected.
+	s.T().Setenv(dev1.EnvVar(), "false")
+	s.True(allDev.Enabled())
+	s.False(dev1.Enabled())
+
+	// All Dev flags are disabled.
 	s.T().Setenv(allDev.EnvVar(), "false")
 	s.False(allDev.Enabled())
 	s.True(allTech.Enabled())
