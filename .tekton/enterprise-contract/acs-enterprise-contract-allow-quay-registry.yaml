@@ -15,9 +15,9 @@ spec:
   resolverRef:
     params:
     - name: url
-      value: https://github.com/redhat-appstudio/build-definitions
+      value: https://github.com/konflux-ci/build-definitions
     - name: revision
       value: main
     - name: pathInRepo
-      value: pipelines/enterprise-contract-redhat-no-hermetic.yaml
+      value: pipelines/enterprise-contract.yaml
     resolver: git
