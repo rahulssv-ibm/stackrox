@@ -28,17 +28,19 @@ description: >-
 sources:
   - name: Default
     policy:
-      - github.com/enterprise-contract/ec-policies//policy/lib
-      - github.com/enterprise-contract/ec-policies//policy/release
+      - oci::quay.io/enterprise-contract/ec-release-policy:git-cd29f49@sha256:6817c74e8cf290e3812790df26ffaa1e0efa4e0f3490e39259fc61a6d3688fdb
     data:
-      - oci::quay.io/redhat-appstudio-tekton-catalog/data-acceptable-bundles:latest
-      - github.com/release-engineering/rhtap-ec-policy//data
-      - github.com/stackrox/stackrox//.tekton/enterprise-contract?ref=rhtap-allow-quay-registry
+        - oci::quay.io/konflux-ci/tekton-catalog/data-acceptable-bundles:latest
+        - github.com/release-engineering/rhtap-ec-policy//data
     config:
       include:
         - '@redhat'
       exclude:
+        # Because some of their images need to be built with network.
+        # We need pre-fetch support for rpms to make this work:
+        # https://issues.redhat.com/browse/KONFLUX-1318
+        # TODO(ROX-20234): Ensure RPM/*dnf operations work in hermetic builds
         - hermetic_build_task
         - tasks.required_tasks_found:prefetch-dependencies
-        # TODO(ROX-22196): undo this
-        - attestation_task_bundle.tasks_defined_in_bundle
+        # # TODO(ROX-22196): undo this
+        # - attestation_task_bundle.tasks_defined_in_bundle
