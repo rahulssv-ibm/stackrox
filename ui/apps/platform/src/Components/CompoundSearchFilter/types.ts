@@ -507,6 +507,105 @@ export type ComplianceScanAttributeInputType = ValueOf<
     ComplianceScanSearchFilterConfig['attributes']
 >['inputType'];
 
+// Alert cluster search filter
+
+export const alertClusterSearchFilterConfig = {
+    displayName: 'Cluster',
+    searchCategory: 'ALERTS',
+    attributes: {
+        ID: {
+            displayName: 'ID',
+            filterChipLabel: 'Cluster ID',
+            searchTerm: 'Cluster ID',
+            inputType: 'autocomplete',
+        },
+        Name: {
+            displayName: 'Name',
+            filterChipLabel: 'Cluster Name',
+            searchTerm: 'Cluster',
+            inputType: 'autocomplete',
+        },
+    },
+} as const;
+
+export type AlertClusterSearchFilterConfig = {
+    displayName: (typeof alertClusterSearchFilterConfig)['displayName'];
+    searchCategory: (typeof alertClusterSearchFilterConfig)['searchCategory'];
+    attributes: (typeof alertClusterSearchFilterConfig)['attributes'];
+};
+
+export type AlertClusterAttribute = keyof AlertClusterSearchFilterConfig['attributes'];
+
+export type AlertClusterAttributeInputType = ValueOf<
+    AlertClusterSearchFilterConfig['attributes']
+>['inputType'];
+
+// Alert namespace search filter
+
+export const alertNamespaceSearchFilterConfig = {
+    displayName: 'Namespace',
+    searchCategory: 'ALERTS',
+    attributes: {
+        ID: {
+            displayName: 'ID',
+            filterChipLabel: 'Namespace ID',
+            searchTerm: 'Namespace ID',
+            inputType: 'autocomplete',
+        },
+        Name: {
+            displayName: 'Name',
+            filterChipLabel: 'Namespace Name',
+            searchTerm: 'Namespace',
+            inputType: 'autocomplete',
+        },
+    },
+} as const;
+
+export type AlertNamespaceSearchFilterConfig = {
+    displayName: (typeof alertNamespaceSearchFilterConfig)['displayName'];
+    searchCategory: (typeof alertNamespaceSearchFilterConfig)['searchCategory'];
+    attributes: (typeof alertNamespaceSearchFilterConfig)['attributes'];
+};
+
+export type AlertNamespaceAttribute = keyof AlertNamespaceSearchFilterConfig['attributes'];
+
+export type AlertNamespaceAttributeInputType = ValueOf<
+    AlertNamespaceSearchFilterConfig['attributes']
+>['inputType'];
+
+// Alert deployment search filter
+
+export const alertDeploymentSearchFilterConfig = {
+    displayName: 'Deployment',
+    searchCategory: 'ALERTS',
+    attributes: {
+        ID: {
+            displayName: 'ID',
+            filterChipLabel: 'Deployment ID',
+            searchTerm: 'Deployment ID',
+            inputType: 'autocomplete',
+        },
+        Name: {
+            displayName: 'Name',
+            filterChipLabel: 'Deployment Name',
+            searchTerm: 'Deployment',
+            inputType: 'autocomplete',
+        },
+    },
+} as const;
+
+export type AlertDeploymentSearchFilterConfig = {
+    displayName: (typeof alertDeploymentSearchFilterConfig)['displayName'];
+    searchCategory: (typeof alertDeploymentSearchFilterConfig)['searchCategory'];
+    attributes: (typeof alertDeploymentSearchFilterConfig)['attributes'];
+};
+
+export type AlertDeploymentAttribute = keyof AlertDeploymentSearchFilterConfig['attributes'];
+
+export type AlertDeploymentAttributeInputType = ValueOf<
+    AlertDeploymentSearchFilterConfig['attributes']
+>['inputType'];
+
 // Compound search filter config
 
 export const compoundSearchFilter: CompoundSearchFilterConfig = {
@@ -522,6 +621,9 @@ export const compoundSearchFilter: CompoundSearchFilterConfig = {
     'Node component': nodeComponentSearchFilterConfig,
     'Profile check': profileCheckSearchFilterConfig,
     'Compliance scan': complianceScanSearchFilterConfig,
+    'Alert cluster': alertClusterSearchFilterConfig,
+    'Alert namespace': alertNamespaceSearchFilterConfig,
+    'Alert deployment': alertDeploymentSearchFilterConfig,
 };
 
 export type CompoundSearchFilterConfig = {
@@ -537,6 +639,9 @@ export type CompoundSearchFilterConfig = {
     'Node component': NodeComponentSearchFilterConfig;
     'Profile check': ProfileCheckSearchFilterConfig;
     'Compliance scan': ComplianceScanSearchFilterConfig;
+    'Alert cluster': AlertClusterSearchFilterConfig;
+    'Alert namespace': AlertNamespaceSearchFilterConfig;
+    'Alert deployment': AlertDeploymentSearchFilterConfig;
 };
 
 // @TODO: Consider Dave's suggestion about reorganizing and readjusting types (https://github.com/stackrox/stackrox/pull/11349#discussion_r1628428375)
@@ -560,7 +665,10 @@ export type SearchFilterAttributeName =
     | PlatformCVEAttribute
     | ImageComponentAttribute
     | ProfileCheckAttribute
-    | ComplianceScanAttribute;
+    | ComplianceScanAttribute
+    | AlertClusterAttribute
+    | AlertNamespaceAttribute
+    | AlertDeploymentAttribute;
 
 export type SearchFilterAttributeInputType =
     | ImageAttributeInputType
@@ -572,7 +680,10 @@ export type SearchFilterAttributeInputType =
     | PlatformCVEAttributeInputType
     | ImageComponentAttributeInputType
     | ProfileCheckAttributeInputType
-    | ComplianceScanAttributeInputType;
+    | ComplianceScanAttributeInputType
+    | AlertClusterAttributeInputType
+    | AlertNamespaceAttributeInputType
+    | AlertDeploymentAttributeInputType;
 
 // Misc
 
