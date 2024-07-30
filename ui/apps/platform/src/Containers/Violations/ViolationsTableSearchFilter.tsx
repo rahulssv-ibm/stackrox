@@ -12,6 +12,7 @@ import {
     clusterSearchFilterConfig,
     deploymentSearchFilterConfig,
     namespaceSearchFilterConfig,
+    alertPolicySearchFilterConfig,
 } from 'Components/CompoundSearchFilter/types';
 import SearchFilterChips from 'Components/PatternFly/SearchFilterChips';
 import CompoundSearchFilter from 'Components/CompoundSearchFilter/components/CompoundSearchFilter';
@@ -22,6 +23,7 @@ const searchFilterConfig = {
     Cluster: getFilteredConfig(clusterSearchFilterConfig, ['Name']),
     Namespace: getFilteredConfig(namespaceSearchFilterConfig, ['Name']),
     Deployment: getFilteredConfig(deploymentSearchFilterConfig, ['Name']),
+    Policy: getFilteredConfig(alertPolicySearchFilterConfig, ['Name', 'Category']),
 };
 
 function ViolationsTableSearchFilter({}: ViolationsTableSearchFilterProps) {

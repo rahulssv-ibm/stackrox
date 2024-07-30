@@ -606,6 +606,39 @@ export type AlertDeploymentAttributeInputType = ValueOf<
     AlertDeploymentSearchFilterConfig['attributes']
 >['inputType'];
 
+// Alert policy search filters
+
+export const alertPolicySearchFilterConfig = {
+    displayName: 'Policy',
+    searchCategory: 'ALERTS',
+    attributes: {
+        Name: {
+            displayName: 'Name',
+            filterChipLabel: 'Policy Name',
+            searchTerm: 'Policy',
+            inputType: 'autocomplete',
+        },
+        Category: {
+            displayName: 'Category',
+            filterChipLabel: 'Policy Category',
+            searchTerm: 'Category',
+            inputType: 'autocomplete',
+        },
+    },
+} as const;
+
+export type AlertPolicySearchFilterConfig = {
+    displayName: (typeof alertPolicySearchFilterConfig)['displayName'];
+    searchCategory: (typeof alertPolicySearchFilterConfig)['searchCategory'];
+    attributes: (typeof alertPolicySearchFilterConfig)['attributes'];
+};
+
+export type AlertPolicyAttribute = keyof AlertPolicySearchFilterConfig['attributes'];
+
+export type AlertPolicyAttributeInputType = ValueOf<
+    AlertPolicySearchFilterConfig['attributes']
+>['inputType'];
+
 // Compound search filter config
 
 export const compoundSearchFilter: CompoundSearchFilterConfig = {
@@ -624,6 +657,7 @@ export const compoundSearchFilter: CompoundSearchFilterConfig = {
     'Alert cluster': alertClusterSearchFilterConfig,
     'Alert namespace': alertNamespaceSearchFilterConfig,
     'Alert deployment': alertDeploymentSearchFilterConfig,
+    'Alert policy': alertPolicySearchFilterConfig,
 };
 
 export type CompoundSearchFilterConfig = {
@@ -642,6 +676,7 @@ export type CompoundSearchFilterConfig = {
     'Alert cluster': AlertClusterSearchFilterConfig;
     'Alert namespace': AlertNamespaceSearchFilterConfig;
     'Alert deployment': AlertDeploymentSearchFilterConfig;
+    'Alert policy': AlertPolicySearchFilterConfig;
 };
 
 // @TODO: Consider Dave's suggestion about reorganizing and readjusting types (https://github.com/stackrox/stackrox/pull/11349#discussion_r1628428375)
@@ -668,7 +703,8 @@ export type SearchFilterAttributeName =
     | ComplianceScanAttribute
     | AlertClusterAttribute
     | AlertNamespaceAttribute
-    | AlertDeploymentAttribute;
+    | AlertDeploymentAttribute
+    | AlertPolicyAttribute;
 
 export type SearchFilterAttributeInputType =
     | ImageAttributeInputType
@@ -683,7 +719,8 @@ export type SearchFilterAttributeInputType =
     | ComplianceScanAttributeInputType
     | AlertClusterAttributeInputType
     | AlertNamespaceAttributeInputType
-    | AlertDeploymentAttributeInputType;
+    | AlertDeploymentAttributeInputType
+    | AlertPolicyAttributeInputType;
 
 // Misc
 
