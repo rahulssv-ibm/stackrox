@@ -5,56 +5,47 @@ metadata:
   labels:
     build.appstudio.redhat.com/pipeline: "gke-qa-e2e-tests"
 spec:
+  params:
+    - name: CLUSTER_NAME
+      type: string
+      description: Name of the infra cluster
+      default: "konflux-gke-qa-e2e-tests"
+    - name: INFRA_TOKEN_SECRET_NAME
+      type: string
+      description: Secret containing the INFRA_TOKEN.
+      default: "e2e-infra-token-secret"
   tasks:
-  - name: list-workspace
-    description: ls the workspace
+  - name: install-infractl
+    description: Install infractl
+    params:
+      - name: CLUSTER_NAME
+        value: "$(params.CLUSTER_NAME)"
+      - name: INFRA_TOKEN_SECRET_NAME
+        value: "$(params.INFRA_TOKEN_SECRET_NAME)"
     taskSpec:
+      volumes:
+      - name: infra-token-secret
+        secret:
+          secretName: $(params.INFRA_TOKEN_SECRET_NAME)
+          optional: true
       steps:
-      - image: registry.access.redhat.com/ubi9/skopeo:9.4@sha256:23557ecf3de07618968affb59adfb3db80336b976501032b5da9e4e92b943776
+      - image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.3.69
+        volumeMounts:
+          - name: infra-token-secret
+            mountPath: /infra-token-secret
         script: |
-          ls
+          mkdir -p /usr/local/bin
+          curl --fail -sL https://infra.rox.systems/v1/cli/linux/amd64/upgrade \
+          | jq -r ".result.fileChunk" \
+          | base64 -d \
+          > /usr/local/bin/infractl
+          chmod +x /usr/local/bin/infractl
+          infractl --version
 
-#apiVersion: tekton.dev/v1
-#kind: Pipeline
-#metadata:
-#  name: gke-qa-e2e-tests
-#spec:
-#  params:
-#  - description: Source Repository URL
-#    name: git-url
-#    type: string
-#  - default: ""
-#    description: Revision of the Source Repository
-#    name: revision
-#    type: string
-#  - default: "0"
-#    description: Depth of the git clone in number of commits. Use "1" for shallow clone. Use "0" for deep clone, i.e. to fetch all commits.
-#    name: clone-depth
-#    type: string
-#  - default: "true"
-#    description: Fetch tags with git clone
-#    name: clone-fetch-tags
-#    type: string
-#  tasks:
-#  - name: clone-repository
-#    params:
-#    - name: url
-#      value: $(params.git-url)
-#    - name: revision
-#      value: $(params.revision)
-#    - name: depth
-#      value: $(params.clone-depth)
-#    - name: fetchTags
-#      value: $(params.clone-fetch-tags)
-#    taskRef:
-#      params:
-#      - name: name
-#        value: git-clone
-#      - name: bundle
-#        value: quay.io/redhat-appstudio-tekton-catalog/task-git-clone:0.1
-#      - name: kind
-#        value: task
-#      resolver: bundles
-#    workspaces:
-#    - name: basic-auth
-#      workspace: git-auth
+          export INFRA_TOKEN=$(</infra-token-secret/infra-token)
+
+          echo ${INFRA_TOKEN} | wc
+
+          infractl create "${CLUSTER_NAME}" --wait --no-slack
+
+          infractl artifacts ${CLUSTER_NAME}"
