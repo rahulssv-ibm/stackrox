@@ -44,8 +44,6 @@ spec:
 
           export INFRA_TOKEN=$(</infra-token-secret/infra-token)
 
-          echo ${INFRA_TOKEN} | wc
-
-          infractl create "${CLUSTER_NAME}" --wait --no-slack
+          infractl create "${CLUSTER_NAME}" gke-default --wait --no-slack
 
           infractl artifacts ${CLUSTER_NAME}"
