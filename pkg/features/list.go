@@ -131,4 +131,7 @@ var (
 
 	// PlatformComponents introduces the concept of platform collections and filtered views across the app.
 	PlatformComponents = registerFeature("Introduce the concept of platform collections and filtered views across the app", "ROX_PLATFORM_COMPONENTS", enabled)
+
+	// ClusterRegistrationSecret enables support for Cluster Registration Secrets (CRS), the next-gen init-bundles.
+	ClusterRegistrationSecret = registerFeature("Enable support for Cluster Registration Secrets (CRS)", "ROX_CLUSTER_REGISTRATION_SECRETS")
 )
