@@ -248,24 +248,23 @@
 
 {{ include "srox.initGlobalPrefix" (list $) }}
 
-{{- $crsFile := ._rox.crs -}}
+{{- $crsFile := ._rox.crs.file -}}
 {{- if kindIs "string" $crsFile -}}
-  {{/* Load CRS. */}}
 
+  {{- $crs := dict -}}
   {{- $_ = set ._rox "createSecrets" false -}}
   {{- $crsManifest := $crsFile | fromYaml -}}
-  {{- $_ = set ._rox "_crsManifest" $crsManifest -}}
-
-  {{- $opaqueCrs := dig "data" "crs" "" $crsManifest -}}
+  {{- $_ = set $crs "_secret" $crsManifest -}}
+  {{- $crsOpaque := dig "data" "crs" "" $crsManifest -}}
   {{/* FAIL ASSERT */}}
-
-  {{- $deserializedCrs := $opaqueCrs | b64dec | b64dec | fromYaml -}}
-  {{- $_ = set ._rox "_crsDeserialized" $deserializedCrs -}}
-  {{- $crsCAs := dig "CAs" list $deserializedCrs -}}
+  {{- $_ = set $crs "_opaque" $crsOpaque -}}
+  {{- $crsDeserialized := $crsOpaque | b64dec | b64dec | fromYaml -}}
+  {{- $_ = set $crs "_deserialized" $crsDeserialized -}}
+  {{- $crsCAs := dig "CAs" list $crsDeserialized -}}
   {{/* FAIL ASSERT */}}
   {{- $crsCA := first $crsCAs -}}
   {{- $_ = set ._rox.ca "_cert" $crsCA -}}
-
+  {{- $_ = set ._rox "crs" $crs -}}
 {{- else -}}
 
 {{/*
