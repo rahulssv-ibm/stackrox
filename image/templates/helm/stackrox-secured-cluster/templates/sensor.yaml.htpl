@@ -105,9 +105,9 @@ spec:
           mountPath: /etc/ssl/
         - name: sensor-etc-pki-volume
           mountPath: /etc/pki/ca-trust/
-        - name: certs
-          mountPath: /run/secrets/stackrox.io/certs/
-          readOnly: true
+        # - name: certs
+        #   mountPath: /run/secrets/stackrox.io/certs/
+        #   readOnly: true
         - name: crs
           mountPath: /run/secrets/stackrox.io/crs/
           readOnly: true
@@ -248,6 +248,7 @@ spec:
       - name: certs
         secret:
           secretName: sensor-tls
+          optional: true
           items:
           - key: sensor-cert.pem
             path: cert.pem
@@ -258,6 +259,7 @@ spec:
       - name: crs
         secret:
           secretName: cluster-registration-secret
+          optional: true
       - name: sensor-etc-ssl-volume
         emptyDir: {}
       - name: sensor-etc-pki-volume
