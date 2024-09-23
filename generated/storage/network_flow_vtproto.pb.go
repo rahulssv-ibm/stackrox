@@ -184,6 +184,7 @@ func (m *NetworkEntityInfo_ExternalSource) CloneVT() *NetworkEntityInfo_External
 	r := new(NetworkEntityInfo_ExternalSource)
 	r.Name = m.Name
 	r.Default = m.Default
+	r.Learned = m.Learned
 	if m.Source != nil {
 		r.Source = m.Source.(interface {
 			CloneVT() isNetworkEntityInfo_ExternalSource_Source
@@ -477,6 +478,9 @@ func (this *NetworkEntityInfo_ExternalSource) EqualVT(that *NetworkEntityInfo_Ex
 		return false
 	}
 	if this.Default != that.Default {
+		return false
+	}
+	if this.Learned != that.Learned {
 		return false
 	}
 	return string(this.unknownFields) == string(that.unknownFields)
@@ -1060,6 +1064,16 @@ func (m *NetworkEntityInfo_ExternalSource) MarshalToSizedBufferVT(dAtA []byte) (
 		}
 		i -= size
 	}
+	if m.Learned {
+		i--
+		if m.Learned {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
 	if m.Default {
 		i--
 		if m.Default {
@@ -1360,6 +1374,9 @@ func (m *NetworkEntityInfo_ExternalSource) SizeVT() (n int) {
 		n += vtmsg.SizeVT()
 	}
 	if m.Default {
+		n += 2
+	}
+	if m.Learned {
 		n += 2
 	}
 	n += len(m.unknownFields)
@@ -2573,6 +2590,26 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			m.Default = bool(v != 0)
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Learned", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Learned = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
@@ -3960,6 +3997,26 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVTUnsafe(dAtA []byte) error 
 				}
 			}
 			m.Default = bool(v != 0)
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Learned", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protohelpers.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Learned = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
