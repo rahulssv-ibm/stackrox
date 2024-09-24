@@ -1385,7 +1385,7 @@ func (m *GetExternalNetworkFlowsRequest) MarshalToSizedBufferVT(dAtA []byte) (in
 		copy(dAtA[i:], m.DeploymentId)
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.DeploymentId)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x12
 	}
 	if len(m.ClusterId) > 0 {
 		i -= len(m.ClusterId)
@@ -3260,7 +3260,7 @@ func (m *GetExternalNetworkFlowsRequest) UnmarshalVT(dAtA []byte) error {
 			}
 			m.ClusterId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DeploymentId", wireType)
 			}
@@ -4999,7 +4999,7 @@ func (m *GetExternalNetworkFlowsRequest) UnmarshalVTUnsafe(dAtA []byte) error {
 			}
 			m.ClusterId = stringValue
 			iNdEx = postIndex
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DeploymentId", wireType)
 			}
