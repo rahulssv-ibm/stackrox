@@ -263,6 +263,7 @@
   {{- $crsCAs := dig "CAs" list $crsDeserialized -}}
   {{/* FAIL ASSERT */}}
   {{- $crsCA := first $crsCAs -}}
+  {{- $_ = set $crs "_caCert" $crsCA -}}
   {{- $_ = set ._rox.ca "_cert" $crsCA -}}
   {{- $_ = set ._rox "crs" $crs -}}
 {{- else -}}

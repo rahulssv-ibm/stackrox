@@ -56,10 +56,31 @@ func EnsureClusterRegistered() error {
 		return errors.Wrap(err, "loading CRS")
 	}
 
+	// Extract CA certificate.
+	var caCert string
+	if len(crs.CAs) > 0 {
+		caCert = crs.CAs[0]
+	}
+	if caCert == "" {
+		return errors.New("empty CA in CRS")
+	}
+
 	// Extract registrator client certificate.
 	clientCert, err := tls.X509KeyPair([]byte(crs.Cert), []byte(crs.Key))
 	if err != nil {
 		return errors.Wrap(err, "parsing CRS certificate")
+	}
+
+	// Store certificates and key in crs-tmp volume.
+	for fileName, data := range map[string]string{
+		mtls.CAFilePath():   caCert,
+		mtls.CertFilePath(): crs.Cert,
+		mtls.KeyFilePath():  crs.Key,
+	} {
+		err = os.WriteFile(fileName, []byte(data), 0600)
+		if err != nil {
+			return errors.Wrapf(err, "writing MTLS material to file %s", fileName)
+		}
 	}
 
 	// Create central client.

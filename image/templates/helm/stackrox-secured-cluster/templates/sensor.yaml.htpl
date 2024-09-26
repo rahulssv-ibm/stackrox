@@ -99,15 +99,22 @@ spec:
           value: "true"
         {{- end }}
         [<- end >]
+        - name: ROX_MTLS_CRS_FILE
+          value: /run/secrets/stackrox.io/crs/crs
+        - name: ROX_MTLS_CA_FILE
+          value: /run/secrets/stackrox.io/crs-tmp/ca.pem
+        - name: ROX_MTLS_CERT_FILE
+          value: /run/secrets/stackrox.io/crs-tmp/cert.pem
+        - name: ROX_MTLS_KEY_FILE
+          value: /run/secrets/stackrox.io/crs-tmp/key.pem
         {{- include "srox.envVars" (list . "deployment" "sensor" "sensor") | nindent 8 }}
         volumeMounts:
         - name: sensor-etc-ssl-volume
           mountPath: /etc/ssl/
         - name: sensor-etc-pki-volume
           mountPath: /etc/pki/ca-trust/
-        # - name: certs
-        #   mountPath: /run/secrets/stackrox.io/certs/
-        #   readOnly: true
+        - name: crs-tmp
+          mountPath: /run/secrets/stackrox.io/crs-tmp/
         - name: crs
           mountPath: /run/secrets/stackrox.io/crs/
           readOnly: true
@@ -256,6 +263,9 @@ spec:
             path: key.pem
           - key: ca.pem
             path: ca.pem
+      - name: crs-tmp
+        emptyDir:
+          medium: Memory
       - name: crs
         secret:
           secretName: cluster-registration-secret
