@@ -154,10 +154,10 @@ func EnsureClusterRegistered() error {
 	ctx := context.Background()
 
 	ctx = metadata.AppendToOutgoingContext(ctx, centralsensor.SensorHelloMetadataKey, "true")
-	// ctx, err = centralsensor.AppendSensorHelloInfoToOutgoingMetadata(ctx, sensorHello)
-	// if err != nil {
-	// 	return errors.Wrap(err, "")
-	// }
+	ctx, err = centralsensor.AppendSensorHelloInfoToOutgoingMetadata(ctx, sensorHello)
+	if err != nil {
+		return errors.Wrap(err, "appending SensorHello to outoing metadata")
+	}
 
 	client := central.NewSensorServiceClient(centralConnection)
 
