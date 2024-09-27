@@ -926,7 +926,7 @@ func compileExpectedAffectedImageIDs(images []*storage.Image, filter *filterImpl
 	return affectedImageIDs
 }
 
-func compileExpectedCountBySeverity(images []*storage.Image, filter *filterImpl) *resourceCountByImageCVESeverity {
+func compileExpectedCountBySeverity(images []*storage.Image, filter *filterImpl) *ResourceCountByImageCVESeverity {
 	sevToCVEsMap := make(map[storage.VulnerabilitySeverity]set.Set[string])
 	sevToFixableCVEsMap := make(map[storage.VulnerabilitySeverity]set.Set[string])
 
@@ -956,7 +956,7 @@ func compileExpectedCountBySeverity(images []*storage.Image, filter *filterImpl)
 			}
 		}
 	}
-	return &resourceCountByImageCVESeverity{
+	return &ResourceCountByImageCVESeverity{
 		CriticalSeverityCount:        sevToCVEsMap[storage.VulnerabilitySeverity_CRITICAL_VULNERABILITY_SEVERITY].Cardinality(),
 		FixableCriticalSeverityCount: sevToFixableCVEsMap[storage.VulnerabilitySeverity_CRITICAL_VULNERABILITY_SEVERITY].Cardinality(),
 
