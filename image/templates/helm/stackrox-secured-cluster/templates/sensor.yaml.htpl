@@ -101,12 +101,8 @@ spec:
         [<- end >]
         - name: ROX_MTLS_CRS_FILE
           value: /run/secrets/stackrox.io/crs/crs
-        - name: ROX_MTLS_CA_FILE
-          value: /run/secrets/stackrox.io/crs-tmp/ca.pem
-        - name: ROX_MTLS_CERT_FILE
-          value: /run/secrets/stackrox.io/crs-tmp/cert.pem
-        - name: ROX_MTLS_KEY_FILE
-          value: /run/secrets/stackrox.io/crs-tmp/key.pem
+        - name: ROX_CRS_TMP_DIR
+          value: /run/secrets/stackrox.io/crs-tmp
         {{- include "srox.envVars" (list . "deployment" "sensor" "sensor") | nindent 8 }}
         volumeMounts:
         - name: sensor-etc-ssl-volume

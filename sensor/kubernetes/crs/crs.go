@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	metautils "github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"github.com/pkg/errors"
@@ -28,11 +29,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const crsTempDirEnvVarName = "ROX_CRS_TMP_DIR"
+
 var log = logging.LoggerForModule()
 
 // EnsureClusterRegistered initiates the CRS based cluster registration flow in case a
 // CRS is found instead of regular service certificate.
 func EnsureClusterRegistered() error {
+	crsTmpDir := os.Getenv(crsTempDirEnvVarName)
+	if crsTmpDir == "" {
+		log.Errorf("environment variable %s must point to a directory suitable for writing sensitive data to", crsTempDirEnvVarName)
+		os.Exit(1)
+	}
+
 	log.Infof("Ensuring Secured Cluster is registered.")
 	clientconn.SetUserAgent(fmt.Sprintf("%s CSR", clientconn.Sensor))
 
@@ -72,15 +81,20 @@ func EnsureClusterRegistered() error {
 	}
 
 	// Store certificates and key in crs-tmp volume.
-	for fileName, data := range map[string]string{
-		mtls.CAFilePath():   caCert,
-		mtls.CertFilePath(): crs.Cert,
-		mtls.KeyFilePath():  crs.Key,
+	for fileName, spec := range map[string]struct {
+		setting env.Setting
+		content string
+	}{
+		"ca.pem":   {setting: mtls.CAFilePathSetting, content: caCert},
+		"cert.pem": {setting: mtls.CertFilePathSetting, content: crs.Cert},
+		"key.pem":  {setting: mtls.CAFilePathSetting, content: crs.Key},
 	} {
-		err = os.WriteFile(fileName, []byte(data), 0600)
+		filePath := filepath.Join(crsTmpDir, fileName)
+		err = os.WriteFile(filePath, []byte(spec.content), 0600)
 		if err != nil {
-			return errors.Wrapf(err, "writing MTLS material to file %s", fileName)
+			return errors.Wrapf(err, "writing MTLS material to file %s", filePath)
 		}
+		os.Setenv(spec.setting.EnvVar(), filePath)
 	}
 
 	// Create central client.
