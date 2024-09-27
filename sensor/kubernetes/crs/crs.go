@@ -21,7 +21,6 @@ import (
 	"github.com/stackrox/rox/pkg/version"
 	"github.com/stackrox/rox/sensor/common/centralclient"
 	"github.com/stackrox/rox/sensor/common/certdistribution"
-	"github.com/stackrox/rox/sensor/common/sensor/helmconfig"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/encoding/gzip"
@@ -87,14 +86,19 @@ func EnsureClusterRegistered() error {
 	}{
 		"ca.pem":   {setting: mtls.CAFilePathSetting, content: caCert},
 		"cert.pem": {setting: mtls.CertFilePathSetting, content: crs.Cert},
-		"key.pem":  {setting: mtls.CAFilePathSetting, content: crs.Key},
+		"key.pem":  {setting: mtls.KeyFilePathSetting, content: crs.Key},
 	} {
 		filePath := filepath.Join(crsTmpDir, fileName)
+		envVar := spec.setting.EnvVar()
 		err = os.WriteFile(filePath, []byte(spec.content), 0600)
 		if err != nil {
 			return errors.Wrapf(err, "writing MTLS material to file %s", filePath)
 		}
-		os.Setenv(spec.setting.EnvVar(), filePath)
+		err = os.Setenv(envVar, filePath)
+		if err != nil {
+			return errors.Wrapf(err, "setting environment variable %s", envVar)
+		}
+		log.Infof("Successfully wrote file %s", filePath)
 	}
 
 	// Create central client.
@@ -133,18 +137,18 @@ func EnsureClusterRegistered() error {
 
 	// Inject desired Helm configuration, if any.
 	// TODO(mclasmei): inject actual Helm config
-	if helmManagedCfg := (&central.HelmManagedConfigInit{}); helmManagedCfg != nil && helmManagedCfg.GetClusterId() == "" {
-		cachedClusterID, err := helmconfig.LoadCachedClusterID()
-		if err != nil {
-			log.Warnf("Failed to load cached cluster ID: %s", err)
-		} else if cachedClusterID != "" {
-			helmManagedCfg = helmManagedCfg.CloneVT()
-			helmManagedCfg.ClusterId = cachedClusterID
-			log.Infof("Re-using cluster ID %s of previous run. If you see the connection to central failing, re-apply a new Helm configuration via 'helm upgrade', or delete the sensor pod.", cachedClusterID)
-		}
+	// if helmManagedCfg := configHandler.GetHelmManagedConfig(); helmManagedCfg != nil && helmManagedCfg.GetClusterId() == "" {
+	// 	cachedClusterID, err := helmconfig.LoadCachedClusterID()
+	// 	if err != nil {
+	// 		log.Warnf("Failed to load cached cluster ID: %s", err)
+	// 	} else if cachedClusterID != "" {
+	// 		helmManagedCfg = helmManagedCfg.CloneVT()
+	// 		helmManagedCfg.ClusterId = cachedClusterID
+	// 		log.Infof("Re-using cluster ID %s of previous run. If you see the connection to central failing, re-apply a new Helm configuration via 'helm upgrade', or delete the sensor pod.", cachedClusterID)
+	// 	}
 
-		sensorHello.HelmManagedConfigInit = helmManagedCfg
-	}
+	// 	sensorHello.HelmManagedConfigInit = helmManagedCfg
+	// }
 
 	// Prepare outgoing context.
 	ctx := context.Background()
