@@ -60,21 +60,21 @@ func (v *imageCVECoreViewImpl) CountBySeverity(ctx context.Context, q *v1.Query)
 		return nil, err
 	}
 
-	var results []*ResourceCountByImageCVESeverity
-	results, err = pgSearch.RunSelectRequestForSchema[ResourceCountByImageCVESeverity](ctx, v.db, v.schema, common.WithCountBySeverityAndFixabilityQuery(q, search.CVE))
+	var results []*common.ResourceCountByImageCVESeverity
+	results, err = pgSearch.RunSelectRequestForSchema[common.ResourceCountByImageCVESeverity](ctx, v.db, v.schema, common.WithCountBySeverityAndFixabilityQuery(q, search.CVE))
 	if err != nil {
 		return nil, err
 	}
 	if len(results) == 0 {
-		return &ResourceCountByImageCVESeverity{}, nil
+		return &common.ResourceCountByImageCVESeverity{}, nil
 	}
 	if len(results) > 1 {
 		err = errors.Errorf("Retrieved multiple rows when only one row is expected for count query %q", q.String())
 		utils.Should(err)
-		return &ResourceCountByImageCVESeverity{}, err
+		return &common.ResourceCountByImageCVESeverity{}, err
 	}
 
-	return &ResourceCountByImageCVESeverity{
+	return &common.ResourceCountByImageCVESeverity{
 		CriticalSeverityCount:        results[0].CriticalSeverityCount,
 		FixableCriticalSeverityCount: results[0].FixableCriticalSeverityCount,
 
@@ -203,7 +203,7 @@ func withSelectCVEIdentifiersQuery(q *v1.Query) *v1.Query {
 	cloned.GroupBy = &v1.QueryGroupBy{
 		Fields: []string{search.CVE.String()},
 	}
-	
+
 	// For pagination and sort to work properly, the filter query to get the CVEs needs to
 	// include the fields we are sorting on.  At this time custom code is required when
 	// sorting on custom sort fields.  For instance counts on the Severity column based on
