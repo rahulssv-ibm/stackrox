@@ -56,9 +56,9 @@ func sendResolvableNotification(notifier notifiers.ResolvableAlertNotifier, aler
 
 func logFailure(notifier notifiers.Notifier, alert *storage.Alert, err error) {
 	protoNotifier := notifier.ProtoNotifier()
-	logging.GetRateLimitedLogger().ErrorL(protoNotifier.GetId(),
-		"Unable to send %s notification to %s (%s): %v",
+	logging.GetRateLimitedLogger().ErrorL(protoNotifier.GetId(), logging.NoPayloadKey,
+		"Unable to send %s notification to %s (%s) for alert %s: %v",
 		alert.GetState().String(), protoNotifier.GetName(),
-		protoNotifier.GetType(), err,
+		protoNotifier.GetType(), alert.GetId(), err,
 	)
 }
