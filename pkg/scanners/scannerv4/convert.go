@@ -173,6 +173,9 @@ func vulnerabilities(vulnerabilities map[string]*v4.VulnerabilityReport_Vulnerab
 		if err := setScoresAndScoreVersion(vuln, ccVuln.GetCvss()); err != nil {
 			utils.Should(err)
 		}
+		if err := setScoresAndScoreVersionList(vuln, ccVuln); err != nil {
+			utils.Should(err)
+		}
 		maybeOverwriteSeverity(vuln)
 		if ccVuln.GetFixedInVersion() != "" {
 			vuln.SetFixedBy = &storage.EmbeddedVulnerability_FixedBy{
@@ -192,24 +195,25 @@ func setScoresAndScoreVersion(vuln *storage.EmbeddedVulnerability, vulnCVSS *v4.
 	}
 	errList := errorhelpers.NewErrorList("failed to parse vector")
 	if vulnCVSS.GetV2() != nil {
-		score, sv, cvssV2, err := toStorageV2Scores(vulnCVSS, vuln.GetCve())
+		score, sv, cvssV2, err := toCVSSV2Scores(vulnCVSS, vuln.GetCve())
 		if err != nil {
 			errList.AddError(err)
 		} else {
-			// This sets the top level score for use in policies.
+			// This sets the top-level score for use in policies.
 			// It will be overwritten if v3 exists.
 			vuln.ScoreVersion = sv
 			vuln.Cvss = score
 			vuln.CvssV2 = cvssV2
 		}
 	}
+
 	if vulnCVSS.GetV3() != nil {
-		score, sv, cvssV3, err := toStorageV3Scores(vulnCVSS, vuln.GetCve())
+		score, sv, cvssV3, err := toCVSSV3Scores(vulnCVSS, vuln.GetCve())
 		if err != nil {
 			errList.AddError(err)
 		} else {
 			vuln.CvssV3 = cvssV3
-			// Overwrite v2, if set.
+			// Overwrite CVSSV2 if already set.
 			vuln.ScoreVersion = sv
 			vuln.Cvss = score
 		}
@@ -225,29 +229,34 @@ func setScoresAndScoreVersionList(vuln *storage.EmbeddedVulnerability, v4Vuln *v
 		return nil
 	}
 
-	scores := make([]*storage.CVSSScore, len(v4Vuln.CvssMetrics))
-	for i, cvss := range v4Vuln.CvssMetrics {
-		scores[i] = &storage.CVSSScore{
+	var scores []*storage.CVSSScore
+	for _, cvss := range v4Vuln.CvssMetrics {
+		score := &storage.CVSSScore{
 			Source: storage.Source(cvss.Source.Number()),
 			Url:    cvss.Url,
 		}
 
-		_, _, cvssV3, v3Err := toStorageV3Scores(cvss, vuln.GetCve())
-		if v3Err == nil && cvssV3 != nil {
-			scores[i].CvssScore = &storage.CVSSScore_Cvssv3{Cvssv3: cvssV3}
-			continue
+		if cvss.GetV3() != nil {
+			_, _, cvssV3, v3Err := toCVSSV3Scores(cvss, vuln.GetCve())
+			if v3Err == nil && cvssV3 != nil {
+				score.CvssScore = &storage.CVSSScore_Cvssv3{Cvssv3: cvssV3}
+				scores = append(scores, score)
+				continue
+			} else {
+				errList.AddError(v3Err)
+			}
 		}
 
 		// Fallback to CVSSV2 if CVSSV3 is not available
-		_, _, cvssV2, v2Err := toStorageV2Scores(cvss, vuln.GetCve())
-		if v2Err == nil && cvssV2 != nil {
-			scores[i].CvssScore = &storage.CVSSScore_Cvssv2{Cvssv2: cvssV2}
-			continue
+		if cvss.GetV2() != nil {
+			_, _, cvssV2, v2Err := toCVSSV2Scores(cvss, vuln.GetCve())
+			if v2Err == nil && cvssV2 != nil {
+				score.CvssScore = &storage.CVSSScore_Cvssv2{Cvssv2: cvssV2}
+				scores = append(scores, score)
+			} else {
+				errList.AddError(v2Err)
+			}
 		}
-
-		// both failed
-		errList.AddError(v3Err)
-		errList.AddError(v2Err)
 	}
 
 	if len(scores) > 0 {
@@ -258,7 +267,7 @@ func setScoresAndScoreVersionList(vuln *storage.EmbeddedVulnerability, v4Vuln *v
 	return errList.ToError()
 }
 
-func toStorageV2Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve string) (float32, storage.EmbeddedVulnerability_ScoreVersion, *storage.CVSSV2, error) {
+func toCVSSV2Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve string) (float32, storage.EmbeddedVulnerability_ScoreVersion, *storage.CVSSV2, error) {
 	errList := errorhelpers.NewErrorList("failed to parse to CVSS V2 scores")
 	v2 := vulnCVSS.GetV2()
 	if c, err := cvssv2.ParseCVSSV2(v2.GetVector()); err == nil {
@@ -279,7 +288,7 @@ func toStorageV2Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve 
 	return 0, 0, nil, errList.ToError()
 }
 
-func toStorageV3Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve string) (float32, storage.EmbeddedVulnerability_ScoreVersion, *storage.CVSSV3, error) {
+func toCVSSV3Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve string) (float32, storage.EmbeddedVulnerability_ScoreVersion, *storage.CVSSV3, error) {
 	errList := errorhelpers.NewErrorList("failed to parse to CVSS V3 scores")
 	v3 := vulnCVSS.GetV3()
 	if c, err := cvssv3.ParseCVSSV3(v3.GetVector()); err == nil {
