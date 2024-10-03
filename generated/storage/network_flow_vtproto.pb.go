@@ -184,7 +184,7 @@ func (m *NetworkEntityInfo_ExternalSource) CloneVT() *NetworkEntityInfo_External
 	r := new(NetworkEntityInfo_ExternalSource)
 	r.Name = m.Name
 	r.Default = m.Default
-	r.Learned = m.Learned
+	r.Discovered = m.Discovered
 	if m.Source != nil {
 		r.Source = m.Source.(interface {
 			CloneVT() isNetworkEntityInfo_ExternalSource_Source
@@ -480,7 +480,7 @@ func (this *NetworkEntityInfo_ExternalSource) EqualVT(that *NetworkEntityInfo_Ex
 	if this.Default != that.Default {
 		return false
 	}
-	if this.Learned != that.Learned {
+	if this.Discovered != that.Discovered {
 		return false
 	}
 	return string(this.unknownFields) == string(that.unknownFields)
@@ -1064,9 +1064,9 @@ func (m *NetworkEntityInfo_ExternalSource) MarshalToSizedBufferVT(dAtA []byte) (
 		}
 		i -= size
 	}
-	if m.Learned {
+	if m.Discovered {
 		i--
-		if m.Learned {
+		if m.Discovered {
 			dAtA[i] = 1
 		} else {
 			dAtA[i] = 0
@@ -1376,7 +1376,7 @@ func (m *NetworkEntityInfo_ExternalSource) SizeVT() (n int) {
 	if m.Default {
 		n += 2
 	}
-	if m.Learned {
+	if m.Discovered {
 		n += 2
 	}
 	n += len(m.unknownFields)
@@ -2592,7 +2592,7 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVT(dAtA []byte) error {
 			m.Default = bool(v != 0)
 		case 4:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Learned", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Discovered", wireType)
 			}
 			var v int
 			for shift := uint(0); ; shift += 7 {
@@ -2609,7 +2609,7 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
-			m.Learned = bool(v != 0)
+			m.Discovered = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
@@ -3999,7 +3999,7 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVTUnsafe(dAtA []byte) error 
 			m.Default = bool(v != 0)
 		case 4:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Learned", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Discovered", wireType)
 			}
 			var v int
 			for shift := uint(0); ; shift += 7 {
@@ -4016,7 +4016,7 @@ func (m *NetworkEntityInfo_ExternalSource) UnmarshalVTUnsafe(dAtA []byte) error 
 					break
 				}
 			}
-			m.Learned = bool(v != 0)
+			m.Discovered = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := protohelpers.Skip(dAtA[iNdEx:])

@@ -642,7 +642,7 @@
         "default": {
           "type": "boolean"
         },
-        "learned": {
+        "discovered": {
           "type": "boolean"
         }
       },

@@ -96,11 +96,11 @@ func insertIntoNetworkEntities(batch *pgx.Batch, obj *storage.NetworkEntity) err
 		obj.GetInfo().GetId(),
 		pgutils.NilOrCIDR(obj.GetInfo().GetExternalSource().GetCidr()),
 		obj.GetInfo().GetExternalSource().GetDefault(),
-		obj.GetInfo().GetExternalSource().GetLearned(),
+		obj.GetInfo().GetExternalSource().GetDiscovered(),
 		serialized,
 	}
 
-	finalStr := "INSERT INTO network_entities (Info_Id, Info_ExternalSource_Cidr, Info_ExternalSource_Default, Info_ExternalSource_Learned, serialized) VALUES($1, $2, $3, $4, $5) ON CONFLICT(Info_Id) DO UPDATE SET Info_Id = EXCLUDED.Info_Id, Info_ExternalSource_Cidr = EXCLUDED.Info_ExternalSource_Cidr, Info_ExternalSource_Default = EXCLUDED.Info_ExternalSource_Default, Info_ExternalSource_Learned = EXCLUDED.Info_ExternalSource_Learned, serialized = EXCLUDED.serialized"
+	finalStr := "INSERT INTO network_entities (Info_Id, Info_ExternalSource_Cidr, Info_ExternalSource_Default, Info_ExternalSource_Discovered, serialized) VALUES($1, $2, $3, $4, $5) ON CONFLICT(Info_Id) DO UPDATE SET Info_Id = EXCLUDED.Info_Id, Info_ExternalSource_Cidr = EXCLUDED.Info_ExternalSource_Cidr, Info_ExternalSource_Default = EXCLUDED.Info_ExternalSource_Default, Info_ExternalSource_Discovered = EXCLUDED.Info_ExternalSource_Discovered, serialized = EXCLUDED.serialized"
 	batch.Queue(finalStr, values...)
 
 	return nil
@@ -121,7 +121,7 @@ func copyFromNetworkEntities(ctx context.Context, s pgSearch.Deleter, tx *postgr
 		"info_id",
 		"info_externalsource_cidr",
 		"info_externalsource_default",
-		"info_externalsource_learned",
+		"info_externalsource_discovered",
 		"serialized",
 	}
 
@@ -140,7 +140,7 @@ func copyFromNetworkEntities(ctx context.Context, s pgSearch.Deleter, tx *postgr
 			obj.GetInfo().GetId(),
 			pgutils.NilOrCIDR(obj.GetInfo().GetExternalSource().GetCidr()),
 			obj.GetInfo().GetExternalSource().GetDefault(),
-			obj.GetInfo().GetExternalSource().GetLearned(),
+			obj.GetInfo().GetExternalSource().GetDiscovered(),
 			serialized,
 		})
 
