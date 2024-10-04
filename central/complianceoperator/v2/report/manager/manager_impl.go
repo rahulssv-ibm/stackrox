@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	profileDatastore "github.com/stackrox/rox/central/complianceoperator/v2/profiles/datastore"
 	reportGen "github.com/stackrox/rox/central/complianceoperator/v2/report/manager/complianceReportgenerator"
 	"github.com/stackrox/rox/central/complianceoperator/v2/report/manager/watcher"
 	scanConfigurationDS "github.com/stackrox/rox/central/complianceoperator/v2/scanconfigurations/datastore"
@@ -32,8 +33,9 @@ type reportRequest struct {
 }
 
 type managerImpl struct {
-	datastore     scanConfigurationDS.DataStore
-	scanDataStore scanDS.DataStore
+	datastore        scanConfigurationDS.DataStore
+	scanDataStore    scanDS.DataStore
+	profileDataStore profileDatastore.DataStore
 
 	runningReportConfigs map[string]*reportRequest
 	// channel for report job requests
@@ -55,12 +57,19 @@ type managerImpl struct {
 	watchingScans map[string]watcher.ScanWatcher
 	// readyQueue holds the scan that are ready to be reported
 	readyQueue *queue.Queue[*watcher.ScanWatcherResults]
+
+	watchingScanConfigsLock sync.Mutex
+	// watchingScanConfigs a map holding the ScanConfigWatchers
+	watchingScanConfigs map[string]watcher.ScanConfigWatcher
+	// scanConfigReadyQueue holds the scan configurations that are ready to be reported
+	scanConfigReadyQueue *queue.Queue[*watcher.ScanConfigWatcherResults]
 }
 
-func New(scanConfigDS scanConfigurationDS.DataStore, scanDataStore scanDS.DataStore, reportGen reportGen.ComplianceReportGenerator) Manager {
+func New(scanConfigDS scanConfigurationDS.DataStore, scanDataStore scanDS.DataStore, profileDataStore profileDatastore.DataStore, reportGen reportGen.ComplianceReportGenerator) Manager {
 	return &managerImpl{
 		datastore:            scanConfigDS,
 		scanDataStore:        scanDataStore,
+		profileDataStore:     profileDataStore,
 		stopper:              concurrency.NewStopper(),
 		runningReportConfigs: make(map[string]*reportRequest, maxRequests),
 		reportRequests:       make(chan *reportRequest, maxRequests),
@@ -68,6 +77,8 @@ func New(scanConfigDS scanConfigurationDS.DataStore, scanDataStore scanDS.DataSt
 		reportGen:            reportGen,
 		watchingScans:        make(map[string]watcher.ScanWatcher),
 		readyQueue:           queue.NewQueue[*watcher.ScanWatcherResults](),
+		watchingScanConfigs:  make(map[string]watcher.ScanConfigWatcher),
+		scanConfigReadyQueue: queue.NewQueue[*watcher.ScanConfigWatcherResults](),
 	}
 }
 
@@ -112,6 +123,7 @@ func (m *managerImpl) Start() {
 	log.Info("Starting compliance report manager")
 	go m.runReports()
 	go m.handleReadyScan()
+	go m.handleReadyScanConfig()
 }
 
 func (m *managerImpl) Stop() {
@@ -128,6 +140,11 @@ func (m *managerImpl) Stop() {
 	concurrency.WithLock(&m.watchingScansLock, func() {
 		for _, scanWatcher := range m.watchingScans {
 			scanWatcher.Stop()
+		}
+	})
+	concurrency.WithLock(&m.watchingScanConfigsLock, func() {
+		for _, scanConfigWatcher := range m.watchingScanConfigs {
+			scanConfigWatcher.Stop()
 		}
 	})
 	m.stopper.Client().Stop()
@@ -206,7 +223,17 @@ func (m *managerImpl) HandleScan(ctx context.Context, scan *storage.ComplianceOp
 		}
 		err = scanWatcher.PushScan(scan)
 	})
-	return err
+
+	if err != nil {
+		return err
+	}
+
+	// Start the ScanConfigWatcher as soon as we received the first scan
+	if _, err := m.getScanConfigWatcher(ctx, scan, m.datastore, m.scanConfigReadyQueue); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // HandleResult starts a new ScanWatcher if needed and pushes the checkResult to it
@@ -247,6 +274,54 @@ func (m *managerImpl) handleReadyScan() {
 				log.Infof("Scan %s done with %d checks", scanResult.Scan.GetScanName(), len(scanResult.CheckResults))
 				concurrency.WithLock(&m.watchingScansLock, func() {
 					delete(m.watchingScans, scanResult.WatcherID)
+				})
+				w, err := m.getScanConfigWatcher(scanResult.Ctx, scanResult.Scan, m.datastore, m.scanConfigReadyQueue)
+				if err != nil {
+					log.Errorf("Unable to create the ScanConfigWatcher: %v", err)
+					continue
+				}
+				if err := w.PushScanResults(scanResult); err != nil {
+					log.Errorf("Unable to push scan %s: %v", scanResult.Scan.GetScanName(), err)
+				}
+			}
+		}
+	}
+}
+
+// getScanConfigWatcher returns the ScanConfigWatcher of a given scan
+func (m *managerImpl) getScanConfigWatcher(ctx context.Context, scan *storage.ComplianceOperatorScanV2, ds scanConfigurationDS.DataStore, queue *queue.Queue[*watcher.ScanConfigWatcherResults]) (watcher.ScanConfigWatcher, error) {
+	sc, err := watcher.GetScanConfigFromScan(ctx, scan, ds)
+	if err != nil {
+		return nil, errors.Errorf("Unable to get scan config id: %v", err)
+	}
+	if sc == nil {
+		return nil, errors.Errorf("ScanConfiguration not found for scan %s", scan.GetScanName())
+	}
+	var w watcher.ScanConfigWatcher
+	var ok bool
+	concurrency.WithLock(&m.watchingScanConfigsLock, func() {
+		if w, ok = m.watchingScanConfigs[sc.GetId()]; !ok {
+			w = watcher.NewScanConfigWatcher(ctx, sc.GetId(), sc, m.scanDataStore, m.profileDataStore, queue)
+			m.watchingScanConfigs[sc.GetId()] = w
+		}
+	})
+	return w, nil
+}
+
+// handleReadyScanConfig pulls scan configs that are ready to be reported
+func (m *managerImpl) handleReadyScanConfig() {
+	if !features.ComplianceReporting.Enabled() {
+		return
+	}
+	for {
+		select {
+		case <-m.stopper.Flow().StopRequested():
+			return
+		default:
+			if result := m.scanConfigReadyQueue.PullBlocking(m.stopper.LowLevel().GetStopRequestSignal()); result != nil {
+				log.Infof("Scan Config %s done with %d scans", result.ScanConfig.GetScanConfigName(), len(result.ScanResults))
+				concurrency.WithLock(&m.watchingScanConfigsLock, func() {
+					delete(m.watchingScanConfigs, result.WatcherID)
 				})
 			}
 		}

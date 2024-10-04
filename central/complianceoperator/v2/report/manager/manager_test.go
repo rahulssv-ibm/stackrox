@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	profileMocks "github.com/stackrox/rox/central/complianceoperator/v2/profiles/datastore/mocks"
 	reportGen "github.com/stackrox/rox/central/complianceoperator/v2/report/manager/complianceReportgenerator/mocks"
 	scanConfigurationDS "github.com/stackrox/rox/central/complianceoperator/v2/scanconfigurations/datastore/mocks"
 	scanMocks "github.com/stackrox/rox/central/complianceoperator/v2/scans/datastore/mocks"
@@ -16,11 +17,12 @@ import (
 
 type ManagerTestSuite struct {
 	suite.Suite
-	mockCtrl      *gomock.Controller
-	ctx           context.Context
-	datastore     *scanConfigurationDS.MockDataStore
-	scanDataStore *scanMocks.MockDataStore
-	reportGen     *reportGen.MockComplianceReportGenerator
+	mockCtrl         *gomock.Controller
+	ctx              context.Context
+	datastore        *scanConfigurationDS.MockDataStore
+	scanDataStore    *scanMocks.MockDataStore
+	profileDataStore *profileMocks.MockDataStore
+	reportGen        *reportGen.MockComplianceReportGenerator
 }
 
 func (m *ManagerTestSuite) SetupSuite() {
@@ -32,6 +34,7 @@ func (m *ManagerTestSuite) SetupTest() {
 	m.mockCtrl = gomock.NewController(m.T())
 	m.datastore = scanConfigurationDS.NewMockDataStore(m.mockCtrl)
 	m.scanDataStore = scanMocks.NewMockDataStore(m.mockCtrl)
+	m.profileDataStore = profileMocks.NewMockDataStore(m.mockCtrl)
 	m.reportGen = reportGen.NewMockComplianceReportGenerator(m.mockCtrl)
 }
 
@@ -40,7 +43,7 @@ func TestComplianceReportManager(t *testing.T) {
 }
 
 func (m *ManagerTestSuite) TestSubmitReportRequest() {
-	manager := New(m.datastore, m.scanDataStore, m.reportGen)
+	manager := New(m.datastore, m.scanDataStore, m.profileDataStore, m.reportGen)
 	reportRequest := &storage.ComplianceOperatorScanConfigurationV2{
 		ScanConfigName: "test_scan_config",
 		Id:             "test_scan_config",
