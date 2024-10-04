@@ -57,12 +57,12 @@ func TestGetQueries(t *testing.T) {
 
 func TestIsExternalDiscovered(t *testing.T) {
 	for _, tc := range []struct {
-		info     storage.NetworkEntityInfo
+		info     *storage.NetworkEntityInfo
 		expected bool
 	}{
 		// is external and discovered
 		{
-			info: storage.NetworkEntityInfo{
+			info: &storage.NetworkEntityInfo{
 				Type: storage.NetworkEntityInfo_EXTERNAL_SOURCE,
 				Desc: &storage.NetworkEntityInfo_ExternalSource_{
 					ExternalSource: &storage.NetworkEntityInfo_ExternalSource{
@@ -75,7 +75,7 @@ func TestIsExternalDiscovered(t *testing.T) {
 
 		// is external but not discovered
 		{
-			info: storage.NetworkEntityInfo{
+			info: &storage.NetworkEntityInfo{
 				Type: storage.NetworkEntityInfo_EXTERNAL_SOURCE,
 				Desc: &storage.NetworkEntityInfo_ExternalSource_{
 					ExternalSource: &storage.NetworkEntityInfo_ExternalSource{
@@ -88,13 +88,13 @@ func TestIsExternalDiscovered(t *testing.T) {
 
 		// neither external or discovered
 		{
-			info: storage.NetworkEntityInfo{
+			info: &storage.NetworkEntityInfo{
 				Type: storage.NetworkEntityInfo_DEPLOYMENT,
 				Desc: &storage.NetworkEntityInfo_Deployment_{},
 			},
 			expected: false,
 		},
 	} {
-		assert.Equal(t, tc.expected, IsExternalDiscovered(&tc.info))
+		assert.Equal(t, tc.expected, IsExternalDiscovered(tc.info))
 	}
 }
