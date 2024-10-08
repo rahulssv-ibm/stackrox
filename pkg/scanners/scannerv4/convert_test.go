@@ -303,6 +303,20 @@ func TestSetScoresAndScoreVersionList(t *testing.T) {
 		wantErr     bool
 	}{
 		{
+			name: "CVSS 3.1 parse error",
+			cvssMetrics: []*v4.VulnerabilityReport_Vulnerability_CVSS{
+				{
+					V3: &v4.VulnerabilityReport_Vulnerability_CVSS_V3{
+						BaseScore: 8.2,
+						Vector:    "CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:Q",
+					},
+					Source: v4.VulnerabilityReport_Vulnerability_CVSS_SOURCE_RED_HAT,
+					Url:    "https://access.redhat.com/security/cve/CVE-1234-567",
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "CVSS 3.0 only",
 			cvssMetrics: []*v4.VulnerabilityReport_Vulnerability_CVSS{
 				{

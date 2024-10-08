@@ -165,7 +165,7 @@ func vulnerabilities(vulnerabilities map[string]*v4.VulnerabilityReport_Vulnerab
 			Cve:     ccVuln.GetName(),
 			Summary: ccVuln.GetDescription(),
 			// TODO(ROX-26547)
-			// The deprecated field is still being populated but a better way is needed to get the default link
+			// The deprecated source is still being populated but a better way is needed to get the default link
 			Link:        link(ccVuln.GetLink()),
 			PublishedOn: ccVuln.GetIssued(),
 			// LastModified: ,
@@ -173,7 +173,7 @@ func vulnerabilities(vulnerabilities map[string]*v4.VulnerabilityReport_Vulnerab
 			Severity:          normalizedSeverity(ccVuln.GetNormalizedSeverity()),
 		}
 		// TODO(ROX-26547)
-		// The deprecated field is still being populated but a better way is needed to get the default CVSS
+		// The deprecated source is still being populated but a better way is needed to get the default CVSS
 		if err := setScoresAndScoreVersion(vuln, ccVuln.GetCvss()); err != nil {
 			utils.Should(err)
 		}
