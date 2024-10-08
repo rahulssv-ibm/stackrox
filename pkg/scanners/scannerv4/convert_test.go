@@ -331,6 +331,42 @@ func TestSetScoresAndScoreVersionList(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "CVSS 2 only",
+			cvssMetrics: []*v4.VulnerabilityReport_Vulnerability_CVSS{
+				{
+					V2: &v4.VulnerabilityReport_Vulnerability_CVSS_V2{
+						BaseScore: 6.4,
+						Vector:    "AV:N/AC:M/Au:M/C:C/I:N/A:P",
+					},
+					Source: v4.VulnerabilityReport_Vulnerability_CVSS_SOURCE_OSV,
+					Url:    "https://osv.dev/vulnerability/CVE-1234-567",
+				},
+			},
+			expected: &storage.EmbeddedVulnerability{
+				CvssMetrics: []*storage.CVSSScore{
+					{
+						CvssScore: &storage.CVSSScore_Cvssv2{
+							Cvssv2: &storage.CVSSV2{
+								Vector:              "AV:N/AC:M/Au:M/C:C/I:N/A:P",
+								AttackVector:        storage.CVSSV2_ATTACK_NETWORK,
+								AccessComplexity:    storage.CVSSV2_ACCESS_MEDIUM,
+								Authentication:      storage.CVSSV2_AUTH_MULTIPLE,
+								Confidentiality:     storage.CVSSV2_IMPACT_COMPLETE,
+								Integrity:           storage.CVSSV2_IMPACT_NONE,
+								Availability:        storage.CVSSV2_IMPACT_PARTIAL,
+								ExploitabilityScore: 5.5,
+								ImpactScore:         7.8,
+								Score:               6.4,
+								Severity:            storage.CVSSV2_MEDIUM,
+							},
+						},
+						Source: storage.Source_SOURCE_OSV, // Updated to match the correct source
+						Url:    "https://osv.dev/vulnerability/CVE-1234-567",
+					},
+				},
+			},
+		},
+		{
 			name: "CVSS 3.0 only",
 			cvssMetrics: []*v4.VulnerabilityReport_Vulnerability_CVSS{
 				{
