@@ -162,14 +162,18 @@ func vulnerabilities(vulnerabilities map[string]*v4.VulnerabilityReport_Vulnerab
 
 		// TODO(ROX-20355): Populate last modified once the API is available.
 		vuln := &storage.EmbeddedVulnerability{
-			Cve:         ccVuln.GetName(),
-			Summary:     ccVuln.GetDescription(),
+			Cve:     ccVuln.GetName(),
+			Summary: ccVuln.GetDescription(),
+			// TODO(ROX-26547)
+			// The deprecated field is still being populated but a better way is needed to get the default link
 			Link:        link(ccVuln.GetLink()),
 			PublishedOn: ccVuln.GetIssued(),
 			// LastModified: ,
 			VulnerabilityType: storage.EmbeddedVulnerability_IMAGE_VULNERABILITY,
 			Severity:          normalizedSeverity(ccVuln.GetNormalizedSeverity()),
 		}
+		// TODO(ROX-26547)
+		// The deprecated field is still being populated but a better way is needed to get the default CVSS
 		if err := setScoresAndScoreVersion(vuln, ccVuln.GetCvss()); err != nil {
 			utils.Should(err)
 		}
