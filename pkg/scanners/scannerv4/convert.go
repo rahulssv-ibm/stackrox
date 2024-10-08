@@ -173,7 +173,7 @@ func vulnerabilities(vulnerabilities map[string]*v4.VulnerabilityReport_Vulnerab
 		if err := setScoresAndScoreVersion(vuln, ccVuln.GetCvss()); err != nil {
 			utils.Should(err)
 		}
-		if err := setScoresAndScoreVersionList(vuln, ccVuln); err != nil {
+		if err := setScoresAndScoreVersionList(vuln, ccVuln.CvssMetrics); err != nil {
 			utils.Should(err)
 		}
 		maybeOverwriteSeverity(vuln)
@@ -222,15 +222,15 @@ func setScoresAndScoreVersion(vuln *storage.EmbeddedVulnerability, vulnCVSS *v4.
 	return errList.ToError()
 }
 
-func setScoresAndScoreVersionList(vuln *storage.EmbeddedVulnerability, v4Vuln *v4.VulnerabilityReport_Vulnerability) error {
+func setScoresAndScoreVersionList(vuln *storage.EmbeddedVulnerability, cvssMetrics []*v4.VulnerabilityReport_Vulnerability_CVSS) error {
 	errList := errorhelpers.NewErrorList("failed to get CVSS Metrics")
 
-	if v4Vuln == nil || v4Vuln.CvssMetrics == nil || len(v4Vuln.CvssMetrics) == 0 {
+	if len(cvssMetrics) == 0 {
 		return nil
 	}
 
 	var scores []*storage.CVSSScore
-	for _, cvss := range v4Vuln.CvssMetrics {
+	for _, cvss := range cvssMetrics {
 		score := &storage.CVSSScore{
 			Source: storage.Source(cvss.Source.Number()),
 			Url:    cvss.Url,
