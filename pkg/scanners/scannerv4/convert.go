@@ -274,6 +274,7 @@ func toCVSSV2Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve str
 		err = cvssv2.CalculateScores(c)
 		if err != nil {
 			errList.AddError(fmt.Errorf("calculating CVSS v2 scores: %w", err))
+			return 0, 0, nil, errList.ToError()
 		}
 		// Use the report's score if it exists.
 		if baseScore := v2.GetBaseScore(); baseScore != 0.0 && baseScore != c.Score {
@@ -295,6 +296,7 @@ func toCVSSV3Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve str
 		err = cvssv3.CalculateScores(c)
 		if err != nil {
 			errList.AddError(fmt.Errorf("calculating CVSS v3 scores: %w", err))
+			return 0, 0, nil, errList.ToError()
 		}
 		// Use the report's score if it exists.
 		if baseScore := v3.GetBaseScore(); baseScore != 0.0 && baseScore != c.Score {
@@ -303,6 +305,8 @@ func toCVSSV3Scores(vulnCVSS *v4.VulnerabilityReport_Vulnerability_CVSS, cve str
 		}
 		c.Severity = cvssv3.Severity(c.Score)
 		return c.Score, storage.EmbeddedVulnerability_V3, c, nil
+	} else {
+		errList.AddError(fmt.Errorf("v3: %w", err))
 	}
 	return 0, 0, nil, errList.ToError()
 }
