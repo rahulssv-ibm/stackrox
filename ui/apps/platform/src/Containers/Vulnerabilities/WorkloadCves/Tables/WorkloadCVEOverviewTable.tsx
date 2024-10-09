@@ -27,7 +27,7 @@ import TbodyUnified from 'Components/TableStateTemplates/TbodyUnified';
 import ExpandRowTh from 'Components/ExpandRowTh';
 import { ACTION_COLUMN_POPPER_PROPS } from 'constants/tables';
 import {
-    generateVisibilityFor,
+    generateVisibilityForColumns,
     getHiddenColumnCount,
     ManagedColumns,
 } from 'hooks/useManagedColumns';
@@ -151,7 +151,7 @@ export type WorkloadCVEOverviewTableProps = {
     }) => IAction[];
     vulnerabilityState: VulnerabilityState | undefined; // TODO Make Required when the ROX_VULN_MGMT_UNIFIED_CVE_DEFERRAL feature flag is removed
     onClearFilters: () => void;
-    tableConfig: ManagedColumns<keyof typeof defaultColumns>['columns'];
+    columnVisibilityState: ManagedColumns<keyof typeof defaultColumns>['columns'];
 };
 
 function WorkloadCVEOverviewTable({
@@ -165,12 +165,12 @@ function WorkloadCVEOverviewTable({
     createTableActions,
     vulnerabilityState,
     onClearFilters,
-    tableConfig,
+    columnVisibilityState,
 }: WorkloadCVEOverviewTableProps) {
     const expandedRowSet = useSet<string>();
     const showExceptionDetailsLink = vulnerabilityState && vulnerabilityState !== 'OBSERVED';
-    const getVisibilityClass = generateVisibilityFor(tableConfig);
-    const hiddenColumnCount = getHiddenColumnCount(tableConfig);
+    const getVisibilityClass = generateVisibilityForColumns(columnVisibilityState);
+    const hiddenColumnCount = getHiddenColumnCount(columnVisibilityState);
 
     const colSpan =
         6 +
