@@ -50,7 +50,7 @@ import ExceptionDetailsCell from '../components/ExceptionDetailsCell';
 import PendingExceptionLabelLayout from '../components/PendingExceptionLabelLayout';
 import PartialCVEDataAlert from '../../components/PartialCVEDataAlert';
 
-export const tableId = 'workloadCvesOverviewTable';
+export const tableId = 'WorkloadCveOverviewTable';
 export const defaultColumns = {
     imagesBySeverity: {
         title: 'Images by severity',
@@ -136,7 +136,7 @@ export type ImageCVE = {
     pendingExceptionCount: number;
 };
 
-export type CVEsTableProps = {
+export type WorkloadCVEOverviewTableProps = {
     tableState: TableUIState<ImageCVE>;
     unfilteredImageCount: number;
     getSortParams: UseURLSortResult['getSortParams'];
@@ -154,7 +154,7 @@ export type CVEsTableProps = {
     tableConfig: ManagedColumns<keyof typeof defaultColumns>['columns'];
 };
 
-function CVEsTable({
+function WorkloadCVEOverviewTable({
     tableState,
     unfilteredImageCount,
     getSortParams,
@@ -166,7 +166,7 @@ function CVEsTable({
     vulnerabilityState,
     onClearFilters,
     tableConfig,
-}: CVEsTableProps) {
+}: WorkloadCVEOverviewTableProps) {
     const expandedRowSet = useSet<string>();
     const showExceptionDetailsLink = vulnerabilityState && vulnerabilityState !== 'OBSERVED';
     const getVisibilityClass = generateVisibilityFor(tableConfig);
@@ -385,4 +385,4 @@ function CVEsTable({
     );
 }
 
-export default CVEsTable;
+export default WorkloadCVEOverviewTable;
