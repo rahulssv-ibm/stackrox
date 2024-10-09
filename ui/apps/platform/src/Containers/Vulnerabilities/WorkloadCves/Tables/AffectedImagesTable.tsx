@@ -15,7 +15,7 @@ import { TableUIState } from 'utils/getTableUIState';
 import ExpandRowTh from 'Components/ExpandRowTh';
 import { isNonEmptyArray } from 'utils/type.utils';
 import {
-    generateVisibilityFor,
+    generateVisibilityForColumns,
     getHiddenColumnCount,
     ManagedColumns,
 } from 'hooks/useManagedColumns';
@@ -127,7 +127,7 @@ function AffectedImagesTable({
     onClearFilters,
     tableConfig,
 }: AffectedImagesTableProps) {
-    const getVisibilityClass = generateVisibilityFor(tableConfig);
+    const getVisibilityClass = generateVisibilityForColumns(tableConfig);
     const hiddenColumnCount = getHiddenColumnCount(tableConfig);
     const expandedRowSet = useSet<string>();
     const colSpan = 8 + -hiddenColumnCount;

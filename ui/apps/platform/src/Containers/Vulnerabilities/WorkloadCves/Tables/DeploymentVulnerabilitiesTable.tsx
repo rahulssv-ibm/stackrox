@@ -14,7 +14,7 @@ import TbodyUnified from 'Components/TableStateTemplates/TbodyUnified';
 import ExpandRowTh from 'Components/ExpandRowTh';
 import { TableUIState } from 'utils/getTableUIState';
 import {
-    generateVisibilityFor,
+    generateVisibilityForColumns,
     getHiddenColumnCount,
     ManagedColumns,
 } from 'hooks/useManagedColumns';
@@ -91,7 +91,7 @@ function DeploymentVulnerabilitiesTable({
     onClearFilters,
     tableConfig,
 }: DeploymentVulnerabilitiesTableProps) {
-    const getVisibilityClass = generateVisibilityFor(tableConfig);
+    const getVisibilityClass = generateVisibilityForColumns(tableConfig);
     const hiddenColumnCount = getHiddenColumnCount(tableConfig);
     const expandedRowSet = useSet<string>();
 
