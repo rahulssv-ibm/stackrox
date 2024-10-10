@@ -129,10 +129,7 @@ func TestScanConfigWatcher(t *testing.T) {
 				event(t, scanConfigWatcher)
 			}
 			require.Eventually(t, func() bool {
-				if resultsQueue.Len() == 0 {
-					return false
-				}
-				return true
+				return resultsQueue.Len() != 0
 			}, 200*time.Millisecond, 10*time.Millisecond)
 			result := resultsQueue.Pull()
 			require.NotNil(t, result)
@@ -249,10 +246,7 @@ func TestScanConfigWatcherSubscribe(t *testing.T) {
 	handleScanResults(scanIDs[2])(t, scanConfigWatcher)
 
 	require.Eventually(t, func() bool {
-		if resultsQueue.Len() == 0 {
-			return false
-		}
-		return true
+		return resultsQueue.Len() != 0
 	}, 200*time.Millisecond, 10*time.Millisecond)
 
 	require.Equal(t, 1, resultsQueue.Len())
