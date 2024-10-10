@@ -669,7 +669,7 @@ func cvssMetrics(_ context.Context, vuln *claircore.Vulnerability, nvdVuln *nvds
 	case strings.EqualFold(vuln.Updater, constants.ManualUpdaterName):
 		// It is expected manually added vulnerabilities only have a single link.
 		src := sourceFromLinks(vuln.Links)
-		// When NVD has available CVSS score, use NVD CVSS score
+		// When NVD and manual data has available CVSS score, use NVD CVSS score
 		if src == v4.VulnerabilityReport_Vulnerability_CVSS_SOURCE_NVD && nvd != nil {
 			preferredCVSS = nvd
 			preferredErr = nvdErr
