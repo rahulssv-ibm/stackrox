@@ -683,7 +683,7 @@ func cvssMetrics(_ context.Context, vuln *claircore.Vulnerability, nvdVuln *nvds
 
 	// If preferred CVSS score is not NVD, NVD needs to be added for data completeness
 	if preferredCVSS.GetSource() != v4.VulnerabilityReport_Vulnerability_CVSS_SOURCE_NVD && nvd != nil {
-		metrics = append(metrics, cvss)
+		metrics = append(metrics, nvd)
 	}
 
 	return metrics, errors.Join(preferredErr, nvdErr)
