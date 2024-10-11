@@ -16,7 +16,7 @@ jobs:
   define-job-matrix:
     outputs:
       matrix: ${{ steps.define-job-matrix.outputs.matrix }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,7 +87,7 @@ jobs:
       ROX_PRODUCT_BRANDING: ${{ matrix.branding }}
       # For consistency with `image/rhel/konflux.Dockerfile`, see comment there.
       UI_PKG_INSTALL_EXTRA_ARGS: --ignore-scripts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     steps:
@@ -119,7 +119,7 @@ jobs:
             ui/apps/platform/package-lock.json
 
   pre-build-cli:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     steps:
@@ -157,7 +157,7 @@ jobs:
       # race-condition-debug - built with -race
       matrix: ${{ fromJson(needs.define-job-matrix.outputs.matrix).pre_build_go_binaries }}
     needs: define-job-matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     steps:
@@ -222,7 +222,7 @@ jobs:
           path: go-binaries-build.tgz
 
   pre-build-docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     steps:
@@ -257,7 +257,7 @@ jobs:
             image/rhel/docs
 
   build-and-push-main:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     needs:
       - define-job-matrix
       - pre-build-ui
@@ -438,7 +438,7 @@ jobs:
             push_matching_collector_scanner_images "${{ env.ROX_PRODUCT_BRANDING }}" "${{ matrix.arch }}"
 
   push-main-manifests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     needs:
     - define-job-matrix
     - build-and-push-main
@@ -551,7 +551,7 @@ jobs:
         add_build_comment_to_pr
 
   build-and-push-operator:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
       env:
@@ -634,7 +634,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'scan-go-binaries')
     env:
       ARTIFACT_DIR: junit-reports/
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     container:
       image: quay.io/stackrox-io/apollo-ci:stackrox-test-0.4.4
     needs:
@@ -764,7 +764,7 @@ jobs:
           contains(github.event.pull_request.labels.*.name, 'ci-test-github-action-slack-messages')
       )
     name: Post failure message to Slack
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-ppc64le
     needs:
       - pre-build-ui
       - pre-build-cli
